@@ -1,7 +1,8 @@
 # TVTest - ISDB-Tb Internacional
 
 Fork de **TVTest** y **LibISDB** adaptado para la norma de televisión digital terrestre **ISDB-Tb (SBTVD)** utilizada en Latinoamérica (Chile, Argentina, Brasil, Perú, etc.).
-<img width="2886" height="1728" alt="image" src="https://github.com/user-attachments/assets/40dd585d-d163-4336-9506-13ddc99f6718" />
+<img width="2886" height="1728" alt="Captura de pantalla 2026-11-04 011627" src="https://github.com/user-attachments/assets/07e06465-f99c-42b8-9ec6-012b9d9521cf" />
+
 
 
 ---
