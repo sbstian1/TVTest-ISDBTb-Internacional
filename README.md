@@ -71,6 +71,25 @@ CH037=0,695.143, ,0,UHF 51
 
 ---
 
+## Decodificadores y Renderizadores Recomendados
+
+Para obtener la mejor calidad de imagen, estabilidad y aceleración por hardware (GPU) en video MPEG-2, H.264/AVC y H.265/HEVC, se recomienda utilizar la siguiente combinación:
+
+* **Filtros de Decodificación:** **[LAV Filters](https://github.com/nevcairiel/lavfilters)**
+  * Paquete de filtros DirectShow de código abierto basado en FFmpeg. Ofrece decodificación rápida, compatibilidad total con aceleración por hardware (D3D11 / DXVA2 copy-back) y excelente estabilidad.
+  * Descargas: [LAV Filters Releases](https://github.com/nevcairiel/lavfilters/releases)
+
+* **Renderizador de Video:** **[MPC Video Renderer](https://github.com/Aleksoid1978/VideoRenderer)**
+  * Renderizador de video moderno basado en Direct3D 11. Proporciona bajo consumo de CPU/GPU, sincronización precisa y desentrelazado de alta fidelidad para transmisiones de TV abierta.
+  * Descargas: [MPC Video Renderer Releases](https://github.com/Aleksoid1978/VideoRenderer/releases)
+
+> **Configuración en TVTest:**  
+> En **Ajustes > Reproducción**, configure:
+> * **Renderizador de video:** `MPC Video Renderer` (o `EVR Custom Presenter`)
+> * **Decodificador de video:** `LAV Video Decoder`
+
+---
+
 ## Compilación
 
 * **Entorno recomendado:** Visual Studio 2022 (v143)
