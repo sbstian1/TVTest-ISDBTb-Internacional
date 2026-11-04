@@ -136,6 +136,9 @@ bool CTooltip::AddTool(UINT ID, const RECT &Rect, LPCTSTR pszText, LPARAM lParam
 	if (m_hwndTooltip == nullptr)
 		return false;
 
+	if (pszText != nullptr && pszText != LPSTR_TEXTCALLBACK)
+		pszText = GetAppClass().LanguageManager.Translate(pszText);
+
 	TOOLINFO ti;
 
 	ti.cbSize = TTTOOLINFO_V2_SIZE;
@@ -154,6 +157,9 @@ bool CTooltip::AddTool(HWND hwnd, LPCTSTR pszText, LPARAM lParam)
 {
 	if (m_hwndTooltip == nullptr || hwnd == nullptr)
 		return false;
+
+	if (pszText != nullptr && pszText != LPSTR_TEXTCALLBACK)
+		pszText = GetAppClass().LanguageManager.Translate(pszText);
 
 	TOOLINFO ti;
 
@@ -204,6 +210,9 @@ bool CTooltip::SetText(UINT ID, LPCTSTR pszText)
 	if (m_hwndTooltip == nullptr)
 		return false;
 
+	if (pszText != nullptr && pszText != LPSTR_TEXTCALLBACK)
+		pszText = GetAppClass().LanguageManager.Translate(pszText);
+
 	TOOLINFO ti;
 
 	ti.cbSize = TTTOOLINFO_V2_SIZE;
@@ -220,6 +229,9 @@ bool CTooltip::AddTrackingTip(UINT ID, LPCTSTR pszText, LPARAM lParam)
 {
 	if (m_hwndTooltip == nullptr)
 		return false;
+
+	if (pszText != nullptr && pszText != LPSTR_TEXTCALLBACK)
+		pszText = GetAppClass().LanguageManager.Translate(pszText);
 
 	TOOLINFO ti;
 

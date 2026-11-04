@@ -451,7 +451,7 @@ INT_PTR CStatusOptions::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPar
 					rc.right = rc.left + m_TextWidth;
 					rc.bottom = pdis->rcItem.bottom - m_ItemMargin.Bottom;
 					::DrawText(
-						pdis->hDC, pItem->GetName(), -1, &rc,
+						pdis->hDC, GetAppClass().LanguageManager.Translate(pItem->GetName()), -1, &rc,
 						DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX);
 					rc.left = rc.right + m_ItemMargin.Left;
 					rc.right =
@@ -658,7 +658,8 @@ void CStatusOptions::CalcTextWidth()
 	for (int i = 0; i < Count; i++) {
 		const CStatusItem *pItem = m_pStatusView->GetItemByID(m_ItemListCur[i].ID);
 		SIZE sz;
-		GetTextExtentPoint32(hdc, pItem->GetName(), lstrlen(pItem->GetName()), &sz);
+		LPCTSTR pszItemName = GetAppClass().LanguageManager.Translate(pItem->GetName());
+		GetTextExtentPoint32(hdc, pszItemName, lstrlen(pszItemName), &sz);
 		if (sz.cx > MaxWidth)
 			MaxWidth = sz.cx;
 	}

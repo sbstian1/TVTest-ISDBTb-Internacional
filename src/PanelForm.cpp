@@ -21,6 +21,7 @@
 #include "stdafx.h"
 #include "TVTest.h"
 #include "PanelForm.h"
+#include "AppMain.h"
 #include "Common/DebugDef.h"
 
 
@@ -799,7 +800,7 @@ void CPanelForm::UpdateTooltip()
 
 CPanelForm::CWindowInfo::CWindowInfo(const PageInfo &Info)
 	: m_pWindow(Info.pPage)
-	, m_Title(Info.pszTitle)
+	, m_Title(GetAppClass().LanguageManager.Translate(Info.pszTitle))
 	, m_ID(Info.ID)
 	, m_Icon(Info.Icon)
 	, m_fVisible(Info.fVisible)

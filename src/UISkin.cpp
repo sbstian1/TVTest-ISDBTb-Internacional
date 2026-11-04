@@ -21,6 +21,7 @@
 #include "stdafx.h"
 #include "TVTest.h"
 #include "UISkin.h"
+#include "AppMain.h"
 #include "MessageDialog.h"
 #include "Common/DebugDef.h"
 
@@ -36,7 +37,11 @@ static CMessageDialog MessageDialog;
 
 int CUISkin::ShowMessage(LPCTSTR pszText, LPCTSTR pszCaption, UINT Type) const
 {
-	return ::MessageBox(GetVideoHostWindow(), pszText, pszCaption, Type);
+	return ::MessageBox(
+		GetVideoHostWindow(),
+		GetAppClass().LanguageManager.Translate(pszText),
+		pszCaption != nullptr ? GetAppClass().LanguageManager.Translate(pszCaption) : nullptr,
+		Type);
 }
 
 

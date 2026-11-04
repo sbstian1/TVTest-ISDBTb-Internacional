@@ -172,6 +172,14 @@ size_t CCommandManager::GetCommandText(int ID, LPTSTR pszText, size_t MaxLength)
 		}
 	}
 
+	if (Length > 0) {
+		LPCTSTR pszTrans = GetAppClass().LanguageManager.Translate(pszText);
+		if (pszTrans != pszText) {
+			StringCopy(pszText, pszTrans, MaxLength);
+			Length = StringLength(pszText);
+		}
+	}
+
 	return Length;
 }
 
@@ -205,6 +213,14 @@ size_t CCommandManager::GetCommandShortText(int ID, LPTSTR pszText, size_t MaxLe
 			Length = std::min(Info.ShortText.length(), MaxLength - 1);
 		} else {
 			Length = ::LoadString(GetAppClass().GetResourceInstance(), ID, pszText, static_cast<int>(MaxLength));
+		}
+	}
+
+	if (Length > 0) {
+		LPCTSTR pszTrans = GetAppClass().LanguageManager.Translate(pszText);
+		if (pszTrans != pszText) {
+			StringCopy(pszText, pszTrans, MaxLength);
+			Length = StringLength(pszText);
 		}
 	}
 

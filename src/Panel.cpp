@@ -21,6 +21,7 @@
 #include "stdafx.h"
 #include "TVTest.h"
 #include "Panel.h"
+#include "AppMain.h"
 #include "DrawUtil.h"
 #include "DPIUtil.h"
 #include "Menu.h"
@@ -135,7 +136,7 @@ bool CPanel::SetWindow(CPanelContent *pContent, LPCTSTR pszTitle)
 		pContent->SetStyleScaling(m_pStyleScaling);
 		pContent->UpdateStyle();
 		pContent->SetVisible(true);
-		StringUtility::Assign(m_Title, pszTitle);
+		StringUtility::Assign(m_Title, GetAppClass().LanguageManager.Translate(pszTitle));
 		GetPosition(&rc);
 		rc.right = rc.left + pContent->GetWidth();
 		SetPosition(&rc);
@@ -268,7 +269,7 @@ void CPanel::Draw(HDC hdc, const RECT &PaintRect) const
 			rc.right -= m_Style.TitleButtonIconSize.Width + m_Style.TitleButtonPadding.Horz();
 			Style::Subtract(&rc, m_Style.TitleLabelMargin);
 			DrawUtil::DrawText(
-				hdc, m_Title.c_str(), rc,
+				hdc, GetAppClass().LanguageManager.Translate(m_Title.c_str()), rc,
 				DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX,
 				&m_Font, m_Theme.TitleStyle.Fore.Fill.GetSolidColor());
 		}

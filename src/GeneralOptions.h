@@ -63,6 +63,7 @@ namespace TVTest
 		bool GetNoScreenSaver() const { return m_fNoScreenSaver; }
 		bool GetNoMonitorLowPower() const { return m_fNoMonitorLowPower; }
 		bool GetNoMonitorLowPowerActiveOnly() const { return m_fNoMonitorLowPowerActiveOnly; }
+		LPCTSTR GetLanguage() const { return m_Language.c_str(); }
 
 	private:
 	// CBasicDialog
@@ -70,7 +71,8 @@ namespace TVTest
 
 		enum {
 			UPDATE_RESIDENT     = 0x00000001UL,
-			UPDATE_1SEGFALLBACK = 0x00000002UL
+			UPDATE_1SEGFALLBACK = 0x00000002UL,
+			UPDATE_LANGUAGE     = 0x00000004UL
 		};
 
 		String m_BonDriverDirectory;
@@ -85,6 +87,7 @@ namespace TVTest
 		bool m_fNoScreenSaver = false;
 		bool m_fNoMonitorLowPower = false;
 		bool m_fNoMonitorLowPowerActiveOnly = false;
+		String m_Language;
 	};
 
 } // namespace TVTest

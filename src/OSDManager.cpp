@@ -102,6 +102,8 @@ bool COSDManager::ShowOSD(LPCTSTR pszText, ShowFlag Flags)
 	if (IsStringEmpty(pszText))
 		return false;
 
+	pszText = GetAppClass().LanguageManager.Translate(pszText);
+
 	const CAppMain &App = GetAppClass();
 	const CCoreEngine &CoreEngine = App.CoreEngine;
 	const LibISDB::ViewerFilter *pViewer = CoreEngine.GetFilter<LibISDB::ViewerFilter>();

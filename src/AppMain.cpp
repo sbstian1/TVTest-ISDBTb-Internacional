@@ -311,6 +311,9 @@ void CAppMain::Initialize()
 	m_FavoritesFileName = szModuleFileName;
 	m_FavoritesFileName.RenameExtension(TEXT(".tvfavorites"));
 
+	TCHAR szAppDir[MAX_PATH];
+	GetAppDirectory(szAppDir);
+	LanguageManager.Initialize(szAppDir);
 	const bool fExists = m_IniFileName.IsFileExists();
 	m_fFirstExecute = !fExists && CmdLineOptions.m_IniFileName.empty();
 	if (fExists) {
@@ -500,6 +503,7 @@ bool CAppMain::LoadSettings()
 
 		MainWindow.ReadSettings(Settings);
 		GeneralOptions.ReadSettings(Settings);
+		LanguageManager.LoadLanguage(GeneralOptions.GetLanguage());
 		ViewOptions.ReadSettings(Settings);
 		OSDOptions.ReadSettings(Settings);
 		NotificationBarOptions.ReadSettings(Settings);

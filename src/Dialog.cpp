@@ -20,6 +20,7 @@
 
 #include "stdafx.h"
 #include "TVTest.h"
+#include "AppMain.h"
 #include "Dialog.h"
 #include "DialogUtil.h"
 #include "DPIUtil.h"
@@ -591,6 +592,7 @@ INT_PTR CBasicDialog::HandleDarkModeMessage(HWND hDlg, UINT uMsg, WPARAM wParam,
 			const INT_PTR Result = HandleMessage(hDlg, uMsg, wParam, lParam);
 
 			InitializeControls(hDlg, m_fDarkMode);
+			GetAppClass().LanguageManager.TranslateDialog(hDlg);
 			return Result;
 		}
 

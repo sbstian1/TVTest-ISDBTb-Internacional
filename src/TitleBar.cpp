@@ -508,6 +508,10 @@ LRESULT CTitleBar::OnMessage(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 					StringCopy(pnmttdi->szText, TEXT("Salir de pantalla completa"));
 				else
 					StringCopy(pnmttdi->szText, pszToolTip[pnmttdi->hdr.idFrom - ITEM_BUTTON_FIRST]);
+				LPCTSTR pszTrans = GetAppClass().LanguageManager.Translate(pnmttdi->szText);
+				if (pszTrans != pnmttdi->szText)
+					StringCopy(pnmttdi->szText, pszTrans);
+
 				pnmttdi->lpszText = pnmttdi->szText;
 				pnmttdi->hinst = nullptr;
 			}

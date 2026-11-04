@@ -21,6 +21,7 @@
 #include "stdafx.h"
 #include "TVTest.h"
 #include "StatusView.h"
+#include "AppMain.h"
 #include "Common/DebugDef.h"
 
 
@@ -163,6 +164,9 @@ bool CStatusItem::GetMenuPos(POINT *pPos, UINT *pFlags, RECT *pExcludeRect)
 
 void CStatusItem::DrawText(HDC hdc, const RECT &Rect, LPCTSTR pszText, DrawTextFlag Flags) const
 {
+	if (pszText != nullptr)
+		pszText = GetAppClass().LanguageManager.Translate(pszText);
+
 	DWORD DTFlags = DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX;
 	if (!!(Flags & DrawTextFlag::HorizontalCenter))
 		DTFlags |= DT_CENTER;

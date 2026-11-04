@@ -38,7 +38,8 @@
 #include "NetworkDefinition.h"
 #include "TSProcessorManager.h"
 #include "OptionDialog.h"
-#include "GeneralOptions.h"
+#include "LanguageManager.h"
+#include "GeneralOptions.h" 
 #include "ViewOptions.h"
 #include "OSDOptions.h"
 #include "NotificationBarOptions.h"
@@ -210,6 +211,7 @@ namespace TVTest
 		CKeywordSearch KeywordSearch;
 		CFeaturedEvents FeaturedEvents;
 		CVariableManager VariableManager;
+		CLanguageManager LanguageManager;
 
 		struct {
 			int Space;

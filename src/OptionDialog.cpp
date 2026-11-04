@@ -292,7 +292,7 @@ INT_PTR COptionDialog::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 				const int OldBkMode = ::SetBkMode(pdis->hDC, TRANSPARENT);
 				rc.left += m_IconWidth + m_IconTextMargin;
 				::DrawText(
-					pdis->hDC, m_PageList[pdis->itemData].pszTitle, -1,
+					pdis->hDC, GetAppClass().LanguageManager.Translate(m_PageList[pdis->itemData].pszTitle), -1,
 					&rc, DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX);
 				::SetTextColor(pdis->hDC, crOldText);
 				::SetBkMode(pdis->hDC, OldBkMode);
@@ -314,7 +314,7 @@ INT_PTR COptionDialog::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					pdis->rcItem.bottom
 				};
 				::DrawText(
-					pdis->hDC, m_PageList[m_CurrentPage].pszTitle, -1,
+					pdis->hDC, GetAppClass().LanguageManager.Translate(m_PageList[m_CurrentPage].pszTitle), -1,
 					&rc, DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
 				SelectFont(pdis->hDC, hfontOld);
 				::SetTextColor(pdis->hDC, crOldText);

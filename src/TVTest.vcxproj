@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -579,6 +579,7 @@
     <ClCompile Include="IniFile.cpp" />
     <ClCompile Include="InitialSettings.cpp" />
     <ClCompile Include="KeywordSearch.cpp" />
+    <ClCompile Include="LanguageManager.cpp" />
     <ClCompile Include="Layout.cpp" />
     <ClCompile Include="Logger.cpp" />
     <ClCompile Include="LogoManager.cpp" />
@@ -728,6 +729,7 @@
     <ClInclude Include="IniFile.h" />
     <ClInclude Include="InitialSettings.h" />
     <ClInclude Include="KeywordSearch.h" />
+    <ClInclude Include="LanguageManager.h" />
     <ClInclude Include="Layout.h" />
     <ClInclude Include="Logger.h" />
     <ClInclude Include="LogoManager.h" />

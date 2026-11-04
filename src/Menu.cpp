@@ -35,6 +35,7 @@ namespace TVTest
 static int MyTrackPopupMenu(
 	HMENU hmenu, UINT Flags, HWND hwnd, const POINT *pPos = nullptr, const RECT *pExcludeRect = nullptr)
 {
+	GetAppClass().LanguageManager.TranslateMenu(hmenu);
 	POINT pt;
 	TPMPARAMS tpm;
 
@@ -145,6 +146,7 @@ bool CMainMenu::Show(UINT Flags, int x, int y, HWND hwnd, bool fToggle, const st
 		m_hmenuShow = hmenuCustom;
 		m_fPopup = true;
 		m_PopupMenu = -1;
+		GetAppClass().LanguageManager.TranslateMenu(hmenuCustom);
 		::TrackPopupMenu(hmenuCustom, Flags, x, y, 0, hwnd, nullptr);
 		m_fPopup = false;
 		m_hmenuShow = nullptr;

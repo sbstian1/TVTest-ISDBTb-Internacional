@@ -54,6 +54,10 @@ bool CGeneralOptions::Apply(DWORD Flags)
 			pPacketParser->SetGenerate1SegPAT(m_fEnable1SegFallback);
 	}
 
+	if ((Flags & UPDATE_LANGUAGE) != 0) {
+		App.LanguageManager.LoadLanguage(m_Language.c_str());
+	}
+
 	return true;
 }
 
@@ -82,6 +86,7 @@ bool CGeneralOptions::ReadSettings(CSettings &Settings)
 	Settings.Read(TEXT("NoScreenSaver"), &m_fNoScreenSaver);
 	Settings.Read(TEXT("NoMonitorLowPower"), &m_fNoMonitorLowPower);
 	Settings.Read(TEXT("NoMonitorLowPowerActiveOnly"), &m_fNoMonitorLowPowerActiveOnly);
+	Settings.Read(TEXT("Language"), &m_Language);
 
 	return true;
 }
@@ -100,6 +105,7 @@ bool CGeneralOptions::WriteSettings(CSettings &Settings)
 	Settings.Write(TEXT("NoScreenSaver"), m_fNoScreenSaver);
 	Settings.Write(TEXT("NoMonitorLowPower"), m_fNoMonitorLowPower);
 	Settings.Write(TEXT("NoMonitorLowPowerActiveOnly"), m_fNoMonitorLowPowerActiveOnly);
+	Settings.Write(TEXT("Language"), m_Language);
 
 	return true;
 }
@@ -218,6 +224,21 @@ INT_PTR CGeneralOptions::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 			DlgCheckBox_Check(hDlg, IDC_OPTIONS_NOMONITORLOWPOWER, m_fNoMonitorLowPower);
 			DlgCheckBox_Check(hDlg, IDC_OPTIONS_NOMONITORLOWPOWERACTIVEONLY, m_fNoMonitorLowPowerActiveOnly);
 			EnableDlgItem(hDlg, IDC_OPTIONS_NOMONITORLOWPOWERACTIVEONLY, m_fNoMonitorLowPower);
+
+			// Idioma / Language
+			const auto &LangMgr = App.LanguageManager;
+			int curSel = 0;
+			for (int i = 0; i < LangMgr.GetLanguageCount(); i++) {
+				const auto *pInfo = LangMgr.GetLanguageInfo(i);
+				if (pInfo != nullptr) {
+					LRESULT index = DlgComboBox_AddString(hDlg, IDC_OPTIONS_LANGUAGE, pInfo->Name.c_str());
+					DlgComboBox_SetItemData(hDlg, IDC_OPTIONS_LANGUAGE, index, i);
+					if (_wcsicmp(pInfo->Code.c_str(), m_Language.empty() ? TEXT("es-ES") : m_Language.c_str()) == 0) {
+						curSel = static_cast<int>(index);
+					}
+				}
+			}
+			DlgComboBox_SetCurSel(hDlg, IDC_OPTIONS_LANGUAGE, curSel);
 
 			AddControls({
 				{IDC_OPTIONS_DRIVERDIRECTORY,        AlignFlag::Horz},
@@ -359,6 +380,21 @@ INT_PTR CGeneralOptions::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 					DlgCheckBox_IsChecked(hDlg, IDC_OPTIONS_NOMONITORLOWPOWERACTIVEONLY);
 				CAppMain &App = GetAppClass();
 				App.UICore.PreventDisplaySave(App.UICore.IsViewerEnabled());
+
+				const int sel = static_cast<int>(DlgComboBox_GetCurSel(hDlg, IDC_OPTIONS_LANGUAGE));
+				if (sel >= 0) {
+					LRESULT langIdx = DlgComboBox_GetItemData(hDlg, IDC_OPTIONS_LANGUAGE, sel);
+					const auto *pInfo = App.LanguageManager.GetLanguageInfo(static_cast<int>(langIdx));
+					if (pInfo != nullptr && m_Language != pInfo->Code) {
+						m_Language = pInfo->Code;
+						SetUpdateFlag(UPDATE_LANGUAGE);
+						::MessageBox(
+							hDlg,
+							TEXT("El idioma seleccionado se aplicará completamente al reiniciar TVTest.\n(The selected language will take full effect after restarting TVTest.)"),
+							TEXT("TVTest"),
+							MB_OK | MB_ICONINFORMATION);
+					}
+				}
 
 				m_fChanged = true;
 			}

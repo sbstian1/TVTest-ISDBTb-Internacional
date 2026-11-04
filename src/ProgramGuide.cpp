@@ -7635,7 +7635,7 @@ bool CProgramGuideFrame::Create(HWND hwndParent, DWORD Style, DWORD ExStyle, int
 		Style |= WS_MAXIMIZE;
 	if (m_fAlwaysOnTop)
 		ExStyle |= WS_EX_TOPMOST;
-	return CreateBasicWindow(hwndParent, Style, ExStyle, ID, m_pszWindowClass, TITLE_TEXT, m_hinst);
+	return CreateBasicWindow(hwndParent, Style, ExStyle, ID, m_pszWindowClass, GetAppClass().LanguageManager.Translate(TITLE_TEXT), m_hinst);
 }
 
 
@@ -7687,7 +7687,7 @@ void CProgramGuideFrame::OnLayoutChange()
 
 void CProgramGuideFrame::SetCaption(LPCTSTR pszFileName)
 {
-	::SetWindowText(m_hwnd, pszFileName);
+	::SetWindowText(m_hwnd, GetAppClass().LanguageManager.Translate(pszFileName));
 }
 
 
