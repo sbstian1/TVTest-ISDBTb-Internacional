@@ -1,0 +1,31 @@
+name: Windows
+
+on:
+  push:
+    branches:
+      - master
+      - develop
+  pull_request:
+    branches:
+      - master
+      - develop
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        configuration:
+          - Debug
+          - Release
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - uses: microsoft/setup-msbuild@v1
+      - name: Build
+        run: |
+          msbuild Projects/LibISDB.sln /p:Configuration=${{ matrix.configuration }} /p:Platform=x64
+      - name: Run test
+        run: |
+          ./Projects/x64/${{ matrix.configuration }}/libisdbtest.exe

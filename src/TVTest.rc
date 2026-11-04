@@ -1,0 +1,2226 @@
+/*
+  TVTest
+  Copyright(c) 2008-2019 DBCTRADO
+
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+
+
+#include "windows.h"
+#include "commctrl.h"
+#include "resource.h"
+#include "TVTest.h"
+#include "TVTestVersion.h"
+
+LANGUAGE LANG_JAPANESE, SUBLANG_DEFAULT
+#pragma code_page(65001)
+
+#define DIALOG_FONT_NAME "Segoe UI"
+#define DIALOG_FONT_SIZE 9
+
+
+IDI_ICON                    ICON "TVTest.ico"
+IDI_TRAY                    ICON "Tray.ico"
+IDI_TRAY_RECORDING          ICON "Tray_Recording.ico"
+IDI_TASKBAR_RECORDING       ICON "Taskbar_Recording.ico"
+IDI_PROGRAMGUIDE            ICON "ProgramGuide.ico"
+IDI_SEARCH                  ICON "Search.ico"
+
+IDI_TASK_FULLSCREEN         ICON "Task_Fullscreen.ico"
+IDI_TASK_DISABLEVIEWER      ICON "Task_DisableViewer.ico"
+IDI_TASK_PROGRAMGUIDE       ICON "Task_ProgramGuide.ico"
+
+IDI_FAVORITES               ICON "Favorites.ico"
+IDI_FAVORITES_ADD           ICON "Favorites_Add.ico"
+IDI_FAVORITES_FOLDER        ICON "Favorites_Folder.ico"
+
+IDI_PANSCAN_AUTO            ICON "PanScan_Auto.ico"
+IDI_PANSCAN_16x9            ICON "PanScan_16x9.ico"
+IDI_PANSCAN_LETTERBOX       ICON "PanScan_Letterbox.ico"
+IDI_PANSCAN_WINDOWBOX       ICON "PanScan_Windowbox.ico"
+IDI_PANSCAN_PILLARBOX       ICON "PanScan_Pillarbox.ico"
+IDI_PANSCAN_4x3             ICON "PanScan_4x3.ico"
+IDI_PANSCAN_32x9            ICON "PanScan_32x9.ico"
+IDI_PANSCAN_16x9_LEFT       ICON "PanScan_16x9Left.ico"
+IDI_PANSCAN_16x9_RIGHT      ICON "PanScan_16x9Right.ico"
+IDI_PANSCAN_TOUCHOUTSIDE    ICON "PanScan_TouchOutside.ico"
+IDI_PANSCAN_OPTIONS         ICON "PanScan_Options.ico"
+
+IDC_GRAB1   CURSOR "Grab1.cur"
+IDC_GRAB2   CURSOR "Grab2.cur"
+
+IDB_LOGO                    BITMAP "TVTestLogo.bmp"
+IDB_LOGO32                  PNG    "TVTestLogo32.png"
+IDB_CAPTURE16               BITMAP "Capture16.bmp"
+IDB_CAPTURE32               BITMAP "Capture32.bmp"
+IDB_TITLEBAR12              BITMAP "TitleBar12.bmp"
+IDB_TITLEBAR24              BITMAP "TitleBar24.bmp"
+IDB_STATUSBAR_FAVORITES16   BITMAP "StatusBar_Favorites16.bmp"
+IDB_STATUSBAR_FAVORITES32   BITMAP "StatusBar_Favorites32.bmp"
+IDB_LOGOFRAME16             BITMAP "LogoFrame16.bmp"
+IDB_LOGOFRAME32             BITMAP "LogoFrame32.bmp"
+IDB_SIDEBAR16               BITMAP "SideBar16.bmp"
+IDB_SIDEBARZOOM16           BITMAP "SideBarZoom16.bmp"
+IDB_SIDEBAR32               BITMAP "SideBar32.bmp"
+IDB_SIDEBARZOOM32           BITMAP "SideBarZoom32.bmp"
+IDB_OPTIONS16               BITMAP "Options16.bmp"
+IDB_OPTIONS32               BITMAP "Options32.bmp"
+IDB_CHEVRON10               BITMAP "Chevron10.bmp"
+IDB_CHEVRON20               BITMAP "Chevron20.bmp"
+IDB_PROGRAMGUIDEICONS       BITMAP "ProgramGuideIcons.bmp"
+IDB_PASSTHROUGH16           BITMAP "Passthrough16.bmp"
+IDB_PASSTHROUGH32           BITMAP "Passthrough32.bmp"
+IDB_HOME                    BITMAP "Home.bmp"
+IDB_PANELTABICONS16         BITMAP "PanelTabs16.bmp"
+IDB_PANELTABICONS32         BITMAP "PanelTabs32.bmp"
+
+IDM_MENU MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		POPUP "Zoom (&Z)"
+		BEGIN
+#ifndef TVTEST_FOR_1SEG
+			MENUITEM "20%", CM_ZOOM_20
+			MENUITEM "25%", CM_ZOOM_25
+#endif
+			MENUITEM "33% (1/3)", CM_ZOOM_33
+			MENUITEM "50%", CM_ZOOM_50
+			MENUITEM "67% (2/3)", CM_ZOOM_66
+			MENUITEM "75%", CM_ZOOM_75
+			MENUITEM "100%", CM_ZOOM_100
+			MENUITEM "150%", CM_ZOOM_150
+			MENUITEM "200%", CM_ZOOM_200
+#ifdef TVTEST_FOR_1SEG
+			MENUITEM "250%", CM_ZOOM_250
+			MENUITEM "300%", CM_ZOOM_300
+#endif
+			MENUITEM SEPARATOR
+			MENUITEM "Opciones de zoom (&O)...", CM_ZOOMOPTIONS
+		END
+		POPUP "Relación de aspecto (&A)"
+		BEGIN
+			MENUITEM "Automático", CM_ASPECTRATIO_DEFAULT
+			MENUITEM "16:9", CM_ASPECTRATIO_16x9
+			MENUITEM "16:9 Letterbox", CM_ASPECTRATIO_LETTERBOX
+			MENUITEM "16:9 Windowbox", CM_ASPECTRATIO_WINDOWBOX
+			MENUITEM "4:3 Pillarbox", CM_ASPECTRATIO_PILLARBOX
+			MENUITEM "4:3", CM_ASPECTRATIO_4x3
+#ifndef TVTEST_FOR_1SEG
+			MENUITEM SEPARATOR
+			MENUITEM "32:9", CM_ASPECTRATIO_32x9
+			MENUITEM "16:9 Izquierda", CM_ASPECTRATIO_16x9_LEFT
+			MENUITEM "16:9 Derecha", CM_ASPECTRATIO_16x9_RIGHT
+#endif
+			MENUITEM SEPARATOR
+			MENUITEM "Recortar y ajustar a pantalla (&F)", CM_FRAMECUT
+			MENUITEM "Ajustes de Pan && Scan (&P)...", CM_PANANDSCANOPTIONS
+		END
+		MENUITEM "Pantalla completa (&F)", CM_FULLSCREEN
+		MENUITEM "Siempre visible (&W)", CM_ALWAYSONTOP
+		MENUITEM SEPARATOR
+		POPUP "Canal (&C)"
+		BEGIN
+			MENUITEM "", 0, GRAYED
+		END
+		POPUP "Servicio (&S)"
+		BEGIN
+			MENUITEM "", 0, GRAYED
+		END
+		POPUP "Sintonizador (&T)"
+		BEGIN
+			MENUITEM "", 0, GRAYED
+		END
+		POPUP "Canales favoritos (&L)"
+		BEGIN
+			MENUITEM SEPARATOR
+			MENUITEM "Añadir a favoritos (&A)", CM_ADDTOFAVORITES
+			MENUITEM "Organizar favoritos (&O)...", CM_ORGANIZEFAVORITES
+		END
+		POPUP "Canales recientes (&H)"
+		BEGIN
+			MENUITEM SEPARATOR
+			MENUITEM "Limpiar historial", CM_CHANNELHISTORY_CLEAR
+		END
+		MENUITEM "Modo 1-Seg (&1)", CM_1SEGMODE
+		MENUITEM SEPARATOR
+		POPUP "Volumen (&V)"
+		BEGIN
+			MENUITEM "Silenciar (&M)", CM_VOLUME_MUTE
+			MENUITEM "Subir (&U)", CM_VOLUME_UP
+			MENUITEM "Bajar (&D)", CM_VOLUME_DOWN
+			MENUITEM SEPARATOR
+			MENUITEM "Sin ganancia (&N)", CM_AUDIOGAIN_NONE
+			MENUITEM "Ganancia (x1.25)", CM_AUDIOGAIN_125
+			MENUITEM "Ganancia (x1.5)", CM_AUDIOGAIN_150
+			MENUITEM "Ganancia (x2.0)", CM_AUDIOGAIN_200
+			MENUITEM SEPARATOR
+			MENUITEM "5.1ch sin ganancia (&S)", CM_SURROUNDAUDIOGAIN_NONE
+			MENUITEM "5.1ch ganancia (x1.25)", CM_SURROUNDAUDIOGAIN_125
+			MENUITEM "5.1ch ganancia (x1.5)", CM_SURROUNDAUDIOGAIN_150
+			MENUITEM "5.1ch ganancia (x2.0)", CM_SURROUNDAUDIOGAIN_200
+		END
+		POPUP "Audio (&M)"
+		BEGIN
+			MENUITEM "", 0, GRAYED
+		END
+		POPUP "Pista de video (&Q)"
+		BEGIN
+			MENUITEM "", 0, GRAYED
+		END
+		MENUITEM SEPARATOR
+		MENUITEM "Iniciar/Detener grabación (&R)", CM_RECORD
+		MENUITEM "Opciones de grabación (&D)...", CM_RECORDOPTION
+		MENUITEM SEPARATOR
+		MENUITEM "Copiar imagen (&P)\tC", CM_COPYIMAGE
+		MENUITEM "Guardar imagen (&J)\tV", CM_SAVEIMAGE
+		MENUITEM "Ventana de captura (&X)", CM_CAPTUREPREVIEW
+		MENUITEM SEPARATOR
+		MENUITEM "Desactivar reproducción (&I)", CM_DISABLEVIEWER
+		POPUP "Reiniciar (&E)"
+		BEGIN
+			MENUITEM "Reiniciar todo (&R)", CM_RESET
+			MENUITEM "Reiniciar visor (&V)", CM_RESETVIEWER
+			MENUITEM "Reiniciar búfer (&B)", CM_RESETBUFFER
+			MENUITEM SEPARATOR
+			MENUITEM "Reconstruir grafo de filtros (&F)", CM_REBUILDVIEWER
+		END
+		MENUITEM SEPARATOR
+		MENUITEM "Panel lateral (&N)", CM_PANEL
+		MENUITEM "Guía de programas EPG (&G)", CM_PROGRAMGUIDE
+		POPUP "Barras y bordes (&B)"
+		BEGIN
+			MENUITEM "Barra de título (&T)", CM_TITLEBAR
+			MENUITEM "Barra de estado (&S)", CM_STATUSBAR
+			MENUITEM "Barra lateral (&I)", CM_SIDEBAR
+			MENUITEM SEPARATOR
+			MENUITEM "Marco de ventana: Normal (&F)", CM_WINDOWFRAME_NORMAL
+			MENUITEM "Marco de ventana: Delgado (&H)", CM_WINDOWFRAME_CUSTOM
+			MENUITEM "Marco de ventana: Sin borde (&N)", CM_WINDOWFRAME_NONE
+			MENUITEM SEPARATOR
+			MENUITEM "Usar barra de título propia (&C)", CM_CUSTOMTITLEBAR
+			MENUITEM "Dividir título con panel acoplado (&P)", CM_SPLITTITLEBAR
+		END
+		POPUP "Plugins (&U)"
+		BEGIN
+			MENUITEM "Ninguno", 0, GRAYED
+		END
+		MENUITEM "Configuración (&O)...", CM_OPTIONS
+		POPUP "Propiedades de filtros (&Y)"
+		BEGIN
+			MENUITEM "Decodificador de video (&D)...", CM_VIDEODECODERPROPERTY
+			MENUITEM "Renderizador de video (&R)...", CM_VIDEORENDERERPROPERTY
+			MENUITEM "Filtro de audio (&A)...", CM_AUDIOFILTERPROPERTY
+			MENUITEM "Renderizador de audio (&U)...", CM_AUDIORENDERERPROPERTY
+			MENUITEM "MPEG-2 Demultiplexer (&M)...", CM_DEMULTIPLEXERPROPERTY
+		END
+		MENUITEM "Información del stream (&K)", CM_STREAMINFO
+		MENUITEM SEPARATOR
+		MENUITEM "Cerrar (&X)", CM_CLOSE
+	END
+END
+
+IDM_RECORD MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Iniciar/Detener grabación (&R)", CM_RECORD
+		MENUITEM "Opciones de grabación (&D)...", CM_RECORDOPTION
+		MENUITEM "Grabar hasta fin del programa (&V)", CM_RECORDEVENT
+		MENUITEM "Pausar grabación (&P)", CM_RECORD_PAUSE
+		MENUITEM SEPARATOR
+		MENUITEM "Iniciar grabación retroactiva (&T)", CM_TIMESHIFTRECORDING, GRAYED
+		MENUITEM "Activar grabación retroactiva (&S)", CM_ENABLETIMESHIFTRECORDING
+		MENUITEM SEPARATOR
+		MENUITEM "Salir al terminar grabación (&E)", CM_EXITONRECORDINGSTOP
+		MENUITEM "Mostrar tiempo restante (&M)", CM_SHOWRECORDREMAINTIME
+		MENUITEM "Ajustes de grabación (&O)...", CM_OPTIONS_RECORD
+	END
+END
+
+IDM_CAPTURE MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Copiar imagen (&P)", CM_COPYIMAGE
+		MENUITEM "Guardar imagen (&G)", CM_SAVEIMAGE
+		MENUITEM SEPARATOR
+		POPUP "Tamaño de captura (&S)"
+		BEGIN
+			MENUITEM "Tamaño original (&O)", CM_CAPTURESIZE_ORIGINAL
+			MENUITEM "Tamaño en pantalla (&V)", CM_CAPTURESIZE_VIEW
+			MENUITEM SEPARATOR
+			MENUITEM "75%", CM_CAPTURESIZE_75
+			MENUITEM "67% (2/3)", CM_CAPTURESIZE_66
+			MENUITEM "50%", CM_CAPTURESIZE_50
+			MENUITEM "33% (1/3)", CM_CAPTURESIZE_33
+			MENUITEM "25%", CM_CAPTURESIZE_25
+			MENUITEM SEPARATOR
+			MENUITEM "1920x1080", CM_CAPTURESIZE_1920X1080
+			MENUITEM "1440x810", CM_CAPTURESIZE_1440X810
+			MENUITEM "1280x720", CM_CAPTURESIZE_1280X720
+			MENUITEM "1024x576", CM_CAPTURESIZE_1024X576
+			MENUITEM "960x540", CM_CAPTURESIZE_960x540
+			MENUITEM "800x450", CM_CAPTURESIZE_800X450
+			MENUITEM "640x360", CM_CAPTURESIZE_640X360
+			MENUITEM "320x180", CM_CAPTURESIZE_320X180
+			MENUITEM SEPARATOR
+			MENUITEM "1440x1080", CM_CAPTURESIZE_1440X1080
+			MENUITEM "1280x960", CM_CAPTURESIZE_1280X960
+			MENUITEM "1024x768", CM_CAPTURESIZE_1024X768
+			MENUITEM "800x600", CM_CAPTURESIZE_800X600
+			MENUITEM "720x540", CM_CAPTURESIZE_720X540
+			MENUITEM "640x480", CM_CAPTURESIZE_640X480
+			MENUITEM "320x240", CM_CAPTURESIZE_320X240
+		END
+		MENUITEM "Ventana de captura (&V)", CM_CAPTUREPREVIEW
+		MENUITEM "Ajustes de captura (&O)...", CM_CAPTUREOPTIONS
+		MENUITEM "Abrir carpeta de capturas (&F)...", CM_OPENCAPTUREFOLDER
+	END
+END
+
+IDM_BUFFERING MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Almacenar en búfer antes de reproducir (&B)", CM_ENABLEBUFFERING
+		MENUITEM "Reiniciar búfer (&R)", CM_RESETBUFFER
+	END
+END
+
+IDM_ERROR MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Reiniciar contador de errores (&R)", CM_RESETERRORCOUNT
+	END
+END
+
+IDM_TIME MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Mostrar hora TOT (&T)", CM_SHOWTOTTIME
+		MENUITEM "Interpolar hora TOT (&I)", CM_INTERPOLATETOTTIME
+		MENUITEM SEPARATOR
+		MENUITEM "Sincronizar reloj con TOT (&A)", CM_ADJUSTTOTTIME
+	END
+END
+
+IDM_PROGRAMINFOSTATUS MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Mostrar info emergente del programa (&P)", CM_PROGRAMINFOSTATUS_POPUPINFO
+		MENUITEM "Mostrar barra de progreso (&B)", CM_PROGRAMINFOSTATUS_SHOWPROGRESS
+	END
+END
+
+IDM_PROGRAMGUIDE MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		POPUP "Fecha (&D)"
+		BEGIN
+			MENUITEM "Hoy", CM_PROGRAMGUIDE_DAY_TODAY
+			MENUITEM "Mañana", CM_PROGRAMGUIDE_DAY_TODAY + 1
+			MENUITEM "Pasado mañana", CM_PROGRAMGUIDE_DAY_TODAY + 2
+			MENUITEM "En 3 días", CM_PROGRAMGUIDE_DAY_TODAY + 3
+			MENUITEM "En 4 días", CM_PROGRAMGUIDE_DAY_TODAY + 4
+			MENUITEM "En 5 días", CM_PROGRAMGUIDE_DAY_TODAY + 5
+			MENUITEM "En 6 días", CM_PROGRAMGUIDE_DAY_TODAY + 6
+			MENUITEM "En 7 días", CM_PROGRAMGUIDE_DAY_TODAY + 7
+		END
+		POPUP "Sintonizador (&T)", GRAYED
+		BEGIN
+			MENUITEM SEPARATOR
+		END
+		MENUITEM SEPARATOR
+		POPUP "Filtrar (&F)"
+		BEGIN
+			MENUITEM "Programas gratuitos (&F)", CM_PROGRAMGUIDE_FILTER_FREE
+			MENUITEM "Programas nuevos (&N)", CM_PROGRAMGUIDE_FILTER_NEWPROGRAM
+			// [再] が設定されている番組が少ないのであまり意味が無い
+			//MENUITEM "本放送(&O)", CM_PROGRAMGUIDE_FILTER_ORIGINAL
+			//MENUITEM "再放送(&R)", CM_PROGRAMGUIDE_FILTER_RERUN
+			MENUITEM SEPARATOR
+			MENUITEM "Excluir televentas (&H)", CM_PROGRAMGUIDE_FILTER_NOT_SHOPPING
+			MENUITEM SEPARATOR
+			MENUITEM "Noticias (&E)", CM_PROGRAMGUIDE_FILTER_NEWS
+			MENUITEM "Deportes (&S)", CM_PROGRAMGUIDE_FILTER_SPORTS
+			MENUITEM "Información (&I)", CM_PROGRAMGUIDE_FILTER_INFORMATION
+			MENUITEM "Drama / Series (&D)", CM_PROGRAMGUIDE_FILTER_DRAMA
+			MENUITEM "Música (&M)", CM_PROGRAMGUIDE_FILTER_MUSIC
+			MENUITEM "Variedades (&Y)", CM_PROGRAMGUIDE_FILTER_VARIETY
+			MENUITEM "Películas (&V)", CM_PROGRAMGUIDE_FILTER_MOVIE
+			MENUITEM "Anime / Animación (&A)", CM_PROGRAMGUIDE_FILTER_ANIME
+			MENUITEM "Documentales / Cultura (&C)", CM_PROGRAMGUIDE_FILTER_DOCUMENTARY
+			MENUITEM "Teatro / Espectáculos (&T)", CM_PROGRAMGUIDE_FILTER_THEATER
+			MENUITEM "Aficiones / Educación (&U)", CM_PROGRAMGUIDE_FILTER_EDUCATION
+			MENUITEM "Bienestar (&W)", CM_PROGRAMGUIDE_FILTER_WELFARE
+		END
+		MENUITEM "Buscar programas (&S)", CM_PROGRAMGUIDE_SEARCH
+		MENUITEM "Configurar canales visibles (&H)...", CM_PROGRAMGUIDE_CHANNELSETTINGS
+		MENUITEM SEPARATOR
+		MENUITEM "Iniciar obtención de EPG (&U)", CM_PROGRAMGUIDE_UPDATE
+		MENUITEM "Detener obtención de EPG (&E)", CM_PROGRAMGUIDE_ENDUPDATE
+		MENUITEM "Actualizar información (&R)", CM_PROGRAMGUIDE_REFRESH
+		MENUITEM "Actualización automática (&A)", CM_PROGRAMGUIDE_AUTOREFRESH
+		MENUITEM SEPARATOR
+		MENUITEM "Siempre visible (&A)", CM_PROGRAMGUIDE_ALWAYSONTOP
+		MENUITEM "Arrastrar para desplazar (&C)", CM_PROGRAMGUIDE_DRAGSCROLL
+		MENUITEM "Info emergente del programa (&P)", CM_PROGRAMGUIDE_POPUPEVENTINFO
+		MENUITEM "Marcar programas destacados (&D)", CM_PROGRAMGUIDE_SHOWFEATUREDMARK
+		MENUITEM "Mantener hora al cambiar fecha (&K)", CM_PROGRAMGUIDE_KEEPTIMEPOS
+		POPUP "Barra de herramientas (&B)"
+		BEGIN
+			MENUITEM "Menú de sintonizador (&T)", CM_PROGRAMGUIDE_TOOLBAR_TUNERMENU
+			MENUITEM "Menú de fecha (&D)", CM_PROGRAMGUIDE_TOOLBAR_DATEMENU
+			MENUITEM "Botones de favoritos (&G)", CM_PROGRAMGUIDE_TOOLBAR_FAVORITES
+			MENUITEM "Barra de fechas (&A)", CM_PROGRAMGUIDE_TOOLBAR_DATE
+			MENUITEM "Barra de horas (&I)", CM_PROGRAMGUIDE_TOOLBAR_TIME
+			MENUITEM SEPARATOR
+			MENUITEM "Configurar barra (&O)...", CM_PROGRAMGUIDE_TOOLBAROPTIONS
+		END
+		MENUITEM SEPARATOR
+		MENUITEM "Añadir a favoritos de guía (&G)...", CM_PROGRAMGUIDE_ADDTOFAVORITES
+		MENUITEM "Organizar favoritos de guía (&O)...", CM_PROGRAMGUIDE_ORGANIZEFAVORITES
+		MENUITEM SEPARATOR
+		MENUITEM "Ejecutar asociación iEPG (&I)", CM_PROGRAMGUIDE_IEPGASSOCIATE
+	END
+END
+
+IDM_PROGRAMGUIDETOOLBAR MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Menú de sintonizador (&T)", CM_PROGRAMGUIDE_TOOLBAR_TUNERMENU
+		MENUITEM "Menú de fecha (&D)", CM_PROGRAMGUIDE_TOOLBAR_DATEMENU
+		MENUITEM "Botones de favoritos (&G)", CM_PROGRAMGUIDE_TOOLBAR_FAVORITES
+		MENUITEM "Barra de fechas (&A)", CM_PROGRAMGUIDE_TOOLBAR_DATE
+		MENUITEM "Barra de horas (&I)", CM_PROGRAMGUIDE_TOOLBAR_TIME
+		MENUITEM SEPARATOR
+		MENUITEM "Configurar barra (&O)...", CM_PROGRAMGUIDE_TOOLBAROPTIONS
+	END
+END
+
+IDM_CHANNELSCAN MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Propiedades (&P)", IDC_CHANNELSCAN_PROPERTIES
+		MENUITEM SEPARATOR
+		MENUITEM "Eliminar (&D)", IDC_CHANNELSCAN_DELETE
+	END
+END
+
+IDM_TRAY MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Mostrar (&S)", CM_SHOW
+		MENUITEM SEPARATOR
+		MENUITEM "Salir (&X)", CM_EXIT
+	END
+END
+
+IDM_CAPTUREPREVIEW MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Guardar (&S)", CM_SAVEIMAGE
+		MENUITEM "Copiar (&C)", CM_COPYIMAGE
+		MENUITEM SEPARATOR
+		MENUITEM "Barra de estado (&B)", CM_CAPTURESTATUSBAR
+	END
+END
+
+IDM_PLUGIN MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Configuración (&S)...", IDC_PLUGIN_SETTINGS
+		MENUITEM SEPARATOR
+		MENUITEM "Descargar (&U)", IDC_PLUGIN_UNLOAD
+	END
+END
+
+IDM_CHANNELPANEL MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Actualizar (&U)", CM_CHANNELPANEL_UPDATE
+		MENUITEM "Ir al canal actual (&C)", CM_CHANNELPANEL_CURCHANNEL
+		MENUITEM SEPARATOR
+		MENUITEM "Mostrar información detallada (&D)", CM_CHANNELPANEL_DETAILPOPUP
+		MENUITEM "Desplazar al canal actual al cambiar (&S)", CM_CHANNELPANEL_SCROLLTOCURCHANNEL
+		POPUP "Programas por canal (&H)"
+		BEGIN
+			MENUITEM "&1 programa", CM_CHANNELPANEL_EVENTS_1
+			MENUITEM "&2 programas", CM_CHANNELPANEL_EVENTS_2
+			MENUITEM "&3 programas", CM_CHANNELPANEL_EVENTS_3
+			MENUITEM "&4 programas", CM_CHANNELPANEL_EVENTS_4
+		END
+		POPUP "Programas adicionales al expandir (&E)"
+		BEGIN
+			MENUITEM "&2 programas", CM_CHANNELPANEL_EXPANDEVENTS_2
+			MENUITEM "&3 programas", CM_CHANNELPANEL_EXPANDEVENTS_3
+			MENUITEM "&4 programas", CM_CHANNELPANEL_EXPANDEVENTS_4
+			MENUITEM "&5 programas", CM_CHANNELPANEL_EXPANDEVENTS_5
+			MENUITEM "&6 programas", CM_CHANNELPANEL_EXPANDEVENTS_6
+			MENUITEM "&7 programas", CM_CHANNELPANEL_EXPANDEVENTS_7
+			MENUITEM "&8 programas", CM_CHANNELPANEL_EXPANDEVENTS_8
+		END
+		MENUITEM SEPARATOR
+		MENUITEM "Usar colores de la guía EPG (&P)", CM_CHANNELPANEL_USEEPGCOLORSCHEME
+		MENUITEM "Mostrar color por género (&G)", CM_CHANNELPANEL_SHOWGENRECOLOR
+		MENUITEM "Marcar programas destacados (&F)", CM_CHANNELPANEL_SHOWFEATUREDMARK
+		POPUP "Barra de tiempo (&B)"
+		BEGIN
+			MENUITEM "No mostrar (&N)", CM_CHANNELPANEL_PROGRESSBAR_NONE
+			MENUITEM "Tiempo transcurrido (&E)", CM_CHANNELPANEL_PROGRESSBAR_ELAPSED
+			MENUITEM "Tiempo restante (&R)", CM_CHANNELPANEL_PROGRESSBAR_REMAINING
+		END
+	END
+END
+
+IDM_INFORMATIONPANEL MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Información de video (&V)", CM_INFORMATIONPANEL_ITEM_VIDEO
+		MENUITEM "Decodificador de video (&D)", CM_INFORMATIONPANEL_ITEM_VIDEODECODER
+		MENUITEM "Renderizador de video (&I)", CM_INFORMATIONPANEL_ITEM_VIDEORENDERER
+		MENUITEM "Dispositivo de audio (&A)", CM_INFORMATIONPANEL_ITEM_AUDIODEVICE
+		MENUITEM "Nivel de señal (&S)", CM_INFORMATIONPANEL_ITEM_SIGNALLEVEL
+		MENUITEM "Bitrate de video/audio (&B)", CM_INFORMATIONPANEL_ITEM_MEDIABITRATE
+		MENUITEM "Errores (&E)", CM_INFORMATIONPANEL_ITEM_ERROR
+		MENUITEM "Grabación (&R)", CM_INFORMATIONPANEL_ITEM_RECORD
+		MENUITEM "Servicio (&C)", CM_INFORMATIONPANEL_ITEM_SERVICE
+		MENUITEM "Información del programa (&P)", CM_INFORMATIONPANEL_ITEM_PROGRAMINFO
+	END
+END
+
+IDM_SIDEBAR MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Fijar barra lateral (&S)", CM_SIDEBAR
+		POPUP "Posición (&P)"
+		BEGIN
+			MENUITEM "Izquierda (&L)", CM_SIDEBAR_PLACE_LEFT
+			MENUITEM "Derecha (&R)", CM_SIDEBAR_PLACE_RIGHT
+			MENUITEM "Arriba (&T)", CM_SIDEBAR_PLACE_TOP
+			MENUITEM "Abajo (&B)", CM_SIDEBAR_PLACE_BOTTOM
+		END
+		MENUITEM SEPARATOR
+		MENUITEM "Ajustes de barra lateral (&O)...", CM_SIDEBAROPTIONS
+	END
+END
+
+IDM_COLORSCHEME MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Seleccionar elementos del mismo color (&S)", IDC_COLORSCHEME_SELECTSAMECOLOR
+		MENUITEM SEPARATOR
+		POPUP "Tipo de degradado (&G)", GRAYED
+		BEGIN
+			MENUITEM "Normal (&N)", IDC_COLORSCHEME_GRADIENT_NORMAL
+			MENUITEM "Brillante (&G)", IDC_COLORSCHEME_GRADIENT_GLOSSY
+			MENUITEM "Entrelazado (&I)", IDC_COLORSCHEME_GRADIENT_INTERLACED
+		END
+		POPUP "Dirección de degradado (&D)", GRAYED
+		BEGIN
+			MENUITEM "Horizontal (&H)", IDC_COLORSCHEME_DIRECTION_HORZ
+			MENUITEM "Vertical (&V)", IDC_COLORSCHEME_DIRECTION_VERT
+			MENUITEM "Simétrico horizontal (&M)", IDC_COLORSCHEME_DIRECTION_HORZMIRROR
+			MENUITEM "Simétrico vertical (&R)", IDC_COLORSCHEME_DIRECTION_VERTMIRROR
+		END
+		POPUP "Tipo de borde (&B)", GRAYED
+		BEGIN
+			MENUITEM "Ninguno (&N)", IDC_COLORSCHEME_BORDER_NONE
+			MENUITEM "Sólido (&F)", IDC_COLORSCHEME_BORDER_SOLID
+			MENUITEM "Hundido (&S)", IDC_COLORSCHEME_BORDER_SUNKEN
+			MENUITEM "Elevado (&R)", IDC_COLORSCHEME_BORDER_RAISED
+		END
+	END
+END
+
+IDM_CAPTIONPANEL MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Copiar (&C)", CM_CAPTIONPANEL_COPY
+		MENUITEM "Seleccionar todo (&A)", CM_CAPTIONPANEL_SELECTALL
+		MENUITEM "Limpiar (&L)", CM_CAPTIONPANEL_CLEAR
+		MENUITEM SEPARATOR
+		MENUITEM "Guardar como (&S)...", CM_CAPTIONPANEL_SAVE
+		MENUITEM SEPARATOR
+		MENUITEM "Activar subtítulos (&E)", CM_CAPTIONPANEL_ENABLE
+		MENUITEM "Desplazamiento automático (&R)", CM_CAPTIONPANEL_AUTOSCROLL
+		MENUITEM "Omitir caracteres pequeños/furigana (&I)", CM_CAPTIONPANEL_IGNORESMALL
+		MENUITEM SEPARATOR
+		MENUITEM "Alfanuméricos de ancho medio (&H)", CM_CAPTIONPANEL_HALFWIDTHALNUM
+		MENUITEM "Solo idiomas europeos en ancho medio (&U)", CM_CAPTIONPANEL_HALFWIDTHEUROLANGS
+	END
+END
+
+IDM_PROGRAMSEARCH MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Ir a este programa (&J)", CM_PROGRAMGUIDE_JUMPEVENT
+		MENUITEM SEPARATOR
+		MENUITEM "Ejecutar asociación iEPG (&I)", CM_PROGRAMGUIDE_IEPGASSOCIATE
+	END
+END
+
+IDM_FEATUREDEVENTS MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Ajustes de programas destacados (&S)...", CM_FEATUREDEVENTS_SETTINGS
+		MENUITEM SEPARATOR
+		MENUITEM "Mostrar descripción del programa (&E)", CM_FEATUREDEVENTS_SHOWEVENTTEXT
+		POPUP "Ordenar por (&O)"
+		BEGIN
+			MENUITEM "Hora de inicio (&T)", CM_FEATUREDEVENTS_SORT_TIME
+			MENUITEM "Canal (&C)", CM_FEATUREDEVENTS_SORT_SERVICE
+		END
+	END
+END
+
+IDM_PROGRAMLISTPANEL MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Mostrar info al pasar el cursor (&M)", CM_PROGRAMLISTPANEL_MOUSEOVEREVENTINFO
+		MENUITEM "Usar colores de la guía EPG (&E)", CM_PROGRAMLISTPANEL_USEEPGCOLORSCHEME
+		MENUITEM "Marcar programas destacados (&F)", CM_PROGRAMLISTPANEL_SHOWFEATUREDMARK
+	END
+END
+
+IDM_EVENTSEARCHKEYWORD MENU
+BEGIN
+	POPUP ""
+	BEGIN
+		MENUITEM "Eliminar palabra del historial (&D)", IDC_EVENTSEARCH_DELETEKEYWORD
+		MENUITEM "Limpiar historial de búsqueda (&C)", IDC_EVENTSEARCH_CLEARKEYWORDHISTORY
+	END
+END
+
+STRINGTABLE
+BEGIN
+    CM_ZOOM_20,                     "Zoom : 20%"
+    CM_ZOOM_25,                     "Zoom : 25%"
+    CM_ZOOM_33,                     "Zoom : 33% (1/3)"
+    CM_ZOOM_50,                     "Zoom : 50%"
+    CM_ZOOM_66,                     "Zoom : 67% (2/3)"
+    CM_ZOOM_75,                     "Zoom : 75%"
+    CM_ZOOM_100,                    "Zoom : 100%"
+    CM_ZOOM_150,                    "Zoom : 150%"
+    CM_ZOOM_200,                    "Zoom : 200%"
+    CM_ZOOM_250,                    "Zoom : 250%"
+    CM_ZOOM_300,                    "Zoom : 300%"
+    CM_CUSTOMZOOM_FIRST + 0,        "Zoom personalizado 1"
+    CM_CUSTOMZOOM_FIRST + 1,        "Zoom personalizado 2"
+    CM_CUSTOMZOOM_FIRST + 2,        "Zoom personalizado 3"
+    CM_CUSTOMZOOM_FIRST + 3,        "Zoom personalizado 4"
+    CM_CUSTOMZOOM_FIRST + 4,        "Zoom personalizado 5"
+    CM_CUSTOMZOOM_FIRST + 5,        "Zoom personalizado 6"
+    CM_CUSTOMZOOM_FIRST + 6,        "Zoom personalizado 7"
+    CM_CUSTOMZOOM_FIRST + 7,        "Zoom personalizado 8"
+    CM_CUSTOMZOOM_FIRST + 8,        "Zoom personalizado 9"
+    CM_CUSTOMZOOM_FIRST + 9,        "Zoom personalizado 10"
+    CM_ZOOMOPTIONS,                 "Opciones de zoom"
+    CM_ASPECTRATIO_TOGGLE,          "Alternar aspecto"
+    CM_ASPECTRATIO_DEFAULT,         "Aspecto : Automático"
+    CM_ASPECTRATIO_16x9,            "Aspecto : 16:9"
+    CM_ASPECTRATIO_LETTERBOX,       "Aspecto : 16:9 Letterbox"
+    CM_ASPECTRATIO_WINDOWBOX,       "Aspecto : 16:9 Windowbox"
+    CM_ASPECTRATIO_PILLARBOX,       "Aspecto : 4:3 Pillarbox"
+    CM_ASPECTRATIO_4x3,             "Aspecto : 4:3"
+    CM_ASPECTRATIO_32x9,            "Aspecto : 32:9"
+    CM_ASPECTRATIO_16x9_LEFT,       "Aspecto : 16:9 Izquierda"
+    CM_ASPECTRATIO_16x9_RIGHT,      "Aspecto : 16:9 Derecha"
+    CM_FRAMECUT,                    "Recortar y ajustar a pantalla"
+    CM_PANANDSCANOPTIONS,           "Ajustes de Pan & Scan"
+    CM_FULLSCREEN,                  "Pantalla completa"
+    CM_ALWAYSONTOP,                 "Siempre visible"
+    CM_CHANNEL_UP,                  "Canal siguiente"
+    CM_CHANNEL_DOWN,                "Canal anterior"
+    CM_CHANNEL_BACKWARD,            "Volver al canal anterior"
+    CM_CHANNEL_FORWARD,             "Avanzar al canal siguiente"
+    CM_CHANNEL_PREVIOUS,            "Último canal visto"
+    CM_VOLUME_MUTE,                 "Silenciar"
+    CM_VOLUME_UP,                   "Subir volumen"
+    CM_VOLUME_DOWN,                 "Bajar volumen"
+    CM_AUDIOGAIN_NONE,              "Sin ganancia de volumen"
+    CM_AUDIOGAIN_125,               "Ganancia de volumen (x1.25)"
+    CM_AUDIOGAIN_150,               "Ganancia de volumen (x1.5)"
+    CM_AUDIOGAIN_200,               "Ganancia de volumen (x2.0)"
+    CM_SURROUNDAUDIOGAIN_NONE,      "5.1ch sin ganancia"
+    CM_SURROUNDAUDIOGAIN_125,       "5.1ch ganancia (x1.25)"
+    CM_SURROUNDAUDIOGAIN_150,       "5.1ch ganancia (x1.5)"
+    CM_SURROUNDAUDIOGAIN_200,       "5.1ch ganancia (x2.0)"
+    CM_AUDIODELAY_MINUS,            "Sincronía de audio: Adelantar"
+    CM_AUDIODELAY_PLUS,             "Sincronía de audio: Retrasar"
+    CM_AUDIODELAY_RESET,            "Sincronía de audio: Reiniciar"
+    CM_SWITCHAUDIO,                 "Cambiar pista de audio"
+    CM_DUALMONO_MAIN,               "Audio principal (Mono)"
+    CM_DUALMONO_SUB,                "Audio secundario (Mono)"
+    CM_DUALMONO_BOTH,               "Audio principal + secundario"
+    CM_SPDIF_DISABLED,              "S/PDIF Passthrough : Desactivado"
+    CM_SPDIF_PASSTHROUGH,           "S/PDIF Passthrough : Activado"
+    CM_SPDIF_AUTO,                  "S/PDIF Passthrough : Automático"
+    CM_SPDIF_TOGGLE,                "S/PDIF Passthrough : Alternar"
+    CM_RECORD,                      "Iniciar/Detener grabación"
+    CM_RECORD_START,                "Iniciar grabación"
+    CM_RECORD_STOP,                 "Detener grabación"
+    CM_RECORD_PAUSE,                "Pausar grabación"
+    CM_RECORDOPTION,                "Opciones de grabación"
+    CM_SHOWRECORDREMAINTIME,        "Mostrar tiempo restante de grabación"
+    CM_TIMESHIFTRECORDING,          "Iniciar grabación retroactiva"
+    CM_ENABLETIMESHIFTRECORDING,    "Activar grabación retroactiva"
+    CM_DISABLEVIEWER,               "Desactivar reproducción"
+    CM_CAPTURE,                     "Capturar imagen"
+    CM_COPYIMAGE,                   "Copiar imagen"
+    CM_SAVEIMAGE,                   "Guardar imagen"
+    CM_CAPTUREPREVIEW,              "Ventana de captura"
+    CM_RESET,                       "Reiniciar"
+    CM_RESETVIEWER,                 "Reiniciar visor"
+    CM_REBUILDVIEWER,               "Reconstruir grafo de filtros"
+    CM_PANEL,                       "Panel lateral"
+    CM_PROGRAMGUIDE,                "Guía de programas EPG"
+    CM_TITLEBAR,                    "Barra de título"
+    CM_STATUSBAR,                   "Barra de estado"
+    CM_SIDEBAR,                     "Barra lateral"
+    CM_WINDOWFRAME_NORMAL,          "Marco de ventana : Normal"
+    CM_WINDOWFRAME_CUSTOM,          "Marco de ventana : Delgado"
+    CM_WINDOWFRAME_NONE,            "Marco de ventana : Sin borde"
+    CM_CUSTOMTITLEBAR,              "Usar barra de título propia"
+    CM_SPLITTITLEBAR,               "Dividir título con panel acoplado"
+    CM_VIDEODECODERPROPERTY,        "Propiedades del decodificador de video"
+    CM_VIDEORENDERERPROPERTY,       "Propiedades del renderizador de video"
+    CM_AUDIOFILTERPROPERTY,         "Propiedades del filtro de audio"
+    CM_AUDIORENDERERPROPERTY,       "Propiedades del renderizador de audio"
+    CM_DEMULTIPLEXERPROPERTY,       "Propiedades del MPEG-2 Demultiplexer"
+    CM_STREAMINFO,                  "Información del stream"
+    CM_OPTIONS,                     "Configuración"
+    CM_CLOSE,                       "Cerrar (Espera/Reanudar)"
+    CM_EXIT,                        "Salir"
+    CM_SHOW,                        "Mostrar ventana"
+    CM_MENU,                        "Menú"
+    CM_ACTIVATE,                    "Activar ventana"
+    CM_MINIMIZE,                    "Minimizar/Restaurar"
+    CM_MAXIMIZE,                    "Maximizar/Restaurar"
+    CM_1SEGMODE,                    "Modo 1-Seg"
+    CM_CLOSETUNER,                  "Cerrar sintonizador"
+    CM_HOMEDISPLAY,                 "Pantalla de inicio"
+    CM_CHANNELDISPLAY,              "Selector de canales"
+    CM_RECORDEVENT,                 "Grabar hasta fin del programa"
+    CM_ENABLEBUFFERING,             "Activar búfer"
+    CM_RESETBUFFER,                 "Reiniciar búfer"
+    CM_RESETERRORCOUNT,             "Reiniciar contador de errores"
+    CM_SHOWTOTTIME,                 "Mostrar hora TOT"
+    CM_ADJUSTTOTTIME,               "Sincronizar reloj con TOT"
+    CM_POPUPTITLEBAR,               "Barra de título emergente"
+    CM_POPUPSTATUSBAR,              "Barra de estado emergente"
+    CM_EVENTINFOOSD                 "Mostrar info de programa en OSD"
+    CM_ZOOMMENU,                    "Menú de zoom"
+    CM_ASPECTRATIOMENU,             "Menú de aspecto"
+    CM_CHANNELMENU,                 "Menú de canales"
+    CM_SERVICEMENU,                 "Menú de servicios"
+    CM_TUNINGSPACEMENU,             "Menú de sintonizador"
+    CM_FAVORITESMENU,               "Menú de favoritos"
+    CM_RECENTCHANNELMENU,           "Menú de canales recientes"
+    CM_VOLUMEMENU,                  "Menú de volumen"
+    CM_AUDIOMENU,                   "Menú de audio"
+    CM_VIDEOMENU,                   "Menú de video"
+    CM_RESETMENU,                   "Menú de reinicio"
+    CM_BARMENU,                     "Menú de barras y bordes"
+    CM_PLUGINMENU,                  "Menú de plugins"
+    CM_FILTERPROPERTYMENU,          "Menú de propiedades de filtros"
+    CM_CHANNELNO_1,                 "Canal 1"
+    CM_CHANNELNO_2,                 "Canal 2"
+    CM_CHANNELNO_3,                 "Canal 3"
+    CM_CHANNELNO_4,                 "Canal 4"
+    CM_CHANNELNO_5,                 "Canal 5"
+    CM_CHANNELNO_6,                 "Canal 6"
+    CM_CHANNELNO_7,                 "Canal 7"
+    CM_CHANNELNO_8,                 "Canal 8"
+    CM_CHANNELNO_9,                 "Canal 9"
+    CM_CHANNELNO_10,                "Canal 10"
+    CM_CHANNELNO_11,                "Canal 11"
+    CM_CHANNELNO_12,                "Canal 12"
+    CM_SERVICE_FIRST,               "Servicio 1"
+    CM_SERVICE_FIRST + 1,           "Servicio 2"
+    CM_SERVICE_FIRST + 2,           "Servicio 3"
+    CM_SERVICE_FIRST + 3,           "Servicio 4"
+    CM_SERVICE_FIRST + 4,           "Servicio 5"
+    CM_SERVICE_FIRST + 5,           "Servicio 6"
+    CM_SERVICE_FIRST + 6,           "Servicio 7"
+    CM_SERVICE_FIRST + 7,           "Servicio 8"
+    CM_SPACE_FIRST,                 "Espacio de sintonía 1"
+    CM_SPACE_FIRST + 1,             "Espacio de sintonía 2"
+    CM_SPACE_FIRST + 2,             "Espacio de sintonía 3"
+    CM_SPACE_FIRST + 3,             "Espacio de sintonía 4"
+    CM_SPACE_FIRST + 4,             "Espacio de sintonía 5"
+
+    CM_PANEL_INFORMATION,           "Panel de información"
+    CM_PANEL_PROGRAMLIST,           "Panel de programación"
+    CM_PANEL_CHANNEL,               "Panel de canales"
+    CM_PANEL_CONTROL,               "Panel de control"
+    CM_PANEL_CAPTION,               "Panel de subtítulos"
+
+    CM_CHANNELNO_2DIGIT,            "Entrada de canal (2 dígitos)"
+    CM_CHANNELNO_3DIGIT,            "Entrada de canal (3 dígitos)"
+
+    CM_ADDTOFAVORITES,              "Añadir a favoritos"
+    CM_ORGANIZEFAVORITES,           "Organizar favoritos"
+
+    CM_SWITCHVIDEO,                 "Cambiar video"
+    CM_VIDEOSTREAM_SWITCH,          "Cambiar stream de video"
+    CM_MULTIVIEW_SWITCH,            "Cambiar multivista"
+
+    CM_WHEEL_VOLUME,                "Volumen"
+    CM_WHEEL_CHANNEL,               "Canal"
+    CM_WHEEL_AUDIO,                 "Audio"
+    CM_WHEEL_ZOOM,                  "Zoom"
+    CM_WHEEL_ASPECTRATIO,           "Aspecto"
+    CM_WHEEL_AUDIODELAY,            "Sincronía de audio"
+
+    IDS_MENU_ZOOM,                  "Zoom"
+    IDS_MENU_ASPECTRATIO,           "Relación de aspecto"
+    IDS_MENU_CHANNEL,               "Canal"
+    IDS_MENU_SERVICE,               "Servicio"
+    IDS_MENU_TUNER,                 "Sintonizador"
+    IDS_MENU_FAVORITES,             "Canales favoritos"
+    IDS_MENU_CHANNELHISTORY,        "Canales recientes"
+    IDS_MENU_VOLUME,                "Volumen"
+    IDS_MENU_AUDIO,                 "Audio"
+    IDS_MENU_VIDEO,                 "Pista de video"
+    IDS_MENU_RESET,                 "Reiniciar"
+    IDS_MENU_BAR,                   "Barras y bordes"
+    IDS_MENU_PLUGIN,                "Plugins"
+    IDS_MENU_FILTERPROPERTY,        "Propiedades de filtros"
+
+    IDS_MENU_ADDTOFAVORITES,        "Añadir a favoritos (&A)"
+    IDS_MENU_ORGANIZEFAVORITES,     "Organizar favoritos (&O)..."
+
+    IDS_POWERREQUEST                "TVTest en reproducción"
+END
+
+IDD_ABOUT DIALOG 0, 0, 224, 80
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Acerca de TVTest"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	CONTROL "", IDC_ABOUT_LOGO, WC_STATIC, SS_BITMAP | SS_CENTERIMAGE | WS_CHILD | WS_VISIBLE, 0, 0, 68, 80
+	CTEXT "", IDC_ABOUT_HEADER, 72, 0, 144, 24, SS_OWNERDRAW
+	// クレジットを追加する場合、\r\n で区切って書き足してください。
+	// (サイズは変えなくてもダイアログ表示時に調整されます)
+	CTEXT L"\x00A9 DBCTRADO / Traducción al español", IDC_ABOUT_INFO, 72, 32, 144, 32, SS_OWNERDRAW
+	CTEXT "https://github.com/DBCTRADO/TVTest", IDC_ABOUT_LINK, 72, 64, 144, 8, SS_OWNERDRAW | SS_NOTIFY
+END
+
+IDD_INITIALSETTINGS DIALOG 0, 0, 316, 168
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Configuración inicial de TVTest"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	CONTROL "", IDC_INITIALSETTINGS_LOGO, WC_STATIC, SS_BITMAP | SS_CENTERIMAGE | WS_CHILD | WS_VISIBLE, 0, 0, 68, 168
+	LTEXT "Configure los siguientes elementos.\nPuede cambiarlos más adelante.", -1, 76, 8, 224, 16
+	RTEXT "BonDriver (&B):", -1, 76, 34, 80, 8
+	COMBOBOX IDC_INITIALSETTINGS_DRIVER, 160, 32, 132, 80, CBS_DROPDOWN | CBS_SORT | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP
+	PUSHBUTTON "...", IDC_INITIALSETTINGS_DRIVER_BROWSE, 296, 32, 12, 12
+	RTEXT "Decodif. MPEG-2 (&M):", -1, 76, 50, 80, 8
+	COMBOBOX IDC_INITIALSETTINGS_MPEG2DECODER, 160, 48, 148, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Decodif. H.264/AVC (&H):", -1, 76, 66, 80, 8
+	COMBOBOX IDC_INITIALSETTINGS_H264DECODER, 160, 64, 148, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Decodif. H.265/HEVC (&E):", -1, 76, 82, 80, 8
+	COMBOBOX IDC_INITIALSETTINGS_H265DECODER, 160, 80, 148, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Renderizador video (&R):", -1, 76, 98, 80, 8
+	COMBOBOX IDC_INITIALSETTINGS_VIDEORENDERER, 160, 96, 80, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	LTEXT "Carpeta de grabaciones (&F):", -1, 76, 114, 140, 8
+	EDITTEXT IDC_INITIALSETTINGS_RECORDFOLDER, 80, 126, 212, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "...", IDC_INITIALSETTINGS_RECORDFOLDER_BROWSE, 296, 126, 12, 12
+	DEFPUSHBUTTON "Aceptar", IDOK, 208, 146, 48, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 260, 146, 48, 14
+	PUSHBUTTON "Ayuda (&H)", IDC_INITIALSETTINGS_HELP, 76, 146, 48, 14
+END
+
+IDD_OPTIONS DIALOG 0, 0, 348, 330
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_CLIPCHILDREN
+EXSTYLE WS_EX_DLGMODALFRAME
+CAPTION "Configuración"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	LISTBOX IDC_OPTIONS_LIST, 4, 4, 88, 300, LBS_NOTIFY | LBS_NOINTEGRALHEIGHT | LBS_OWNERDRAWFIXED | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS
+	LTEXT "", IDC_OPTIONS_TITLE, 100, 4, 240, 12, SS_OWNERDRAW | WS_CLIPSIBLINGS
+	LTEXT "", IDC_OPTIONS_PAGEPLACE, 92, 16, 256, 288, NOT WS_VISIBLE
+	LTEXT "", IDC_OPTIONS_SEPARATOR, 4, 308, 340, 1, SS_ETCHEDHORZ | WS_CLIPSIBLINGS
+	DEFPUSHBUTTON "Aceptar", IDOK, 244, 312, 48, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Cancelar", IDCANCEL, 296, 312, 48, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Ayuda", IDC_OPTIONS_HELP, 4, 312, 48, 14, WS_CLIPSIBLINGS
+END
+
+IDD_OPTIONS_GENERAL DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "General"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	AUTOCHECKBOX "Modo residente en bandeja (&I)", IDC_OPTIONS_RESIDENT, 8, 8, 236, 9
+	AUTOCHECKBOX "Impedir múltiples instancias (&K)", IDC_OPTIONS_KEEPSINGLETASK, 8, 20, 236, 9
+	AUTOCHECKBOX "Mantener guía EPG al cerrar ventana principal (&G)", IDC_OPTIONS_STANDALONEPROGRAMGUIDE, 8, 32, 236, 9
+	AUTOCHECKBOX "Agrupar barra de tareas por ruta (&T) (req. reinicio)", IDC_OPTIONS_USEUNIQUEAPPID, 8, 44, 240, 9
+	AUTOCHECKBOX "Cambiar a 1-Seg si no hay señal Full-Seg (&1)", IDC_OPTIONS_ENABLE1SEGFALLBACK, 8, 56, 236, 9
+
+	LTEXT "Carpeta BonDriver (&F): (req. reinicio)", -1, 8, 72, 132, 8
+	RTEXT "*Vacío = carpeta del programa", -1, 140, 72, 108, 8
+	EDITTEXT IDC_OPTIONS_DRIVERDIRECTORY, 16, 84, 216, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "...", IDC_OPTIONS_DRIVERDIRECTORY_BROWSE, 236, 84, 12, 12
+
+	AUTORADIOBUTTON "Ninguno (&N)", IDC_OPTIONS_DEFAULTDRIVER_NONE, 16, 112, 100, 9, WS_GROUP
+	AUTORADIOBUTTON "Último BonDriver usado (&L)", IDC_OPTIONS_DEFAULTDRIVER_LAST, 16, 124, 160, 9
+	AUTORADIOBUTTON "BonDriver específico (&D)", IDC_OPTIONS_DEFAULTDRIVER_CUSTOM, 16, 136, 160, 9
+	COMBOBOX IDC_OPTIONS_DEFAULTDRIVER, 24, 148, 200, 80, CBS_DROPDOWN | CBS_SORT | CBS_AUTOHSCROLL | WS_VSCROLL | WS_TABSTOP | WS_GROUP
+	PUSHBUTTON "...", IDC_OPTIONS_DEFAULTDRIVER_BROWSE, 228, 148, 12, 12
+	GROUPBOX "BonDriver predeterminado", -1, 8, 100, 240, 68, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Habilitar Jump List (&J)", IDC_OPTIONS_ENABLEJUMPLIST, 12, 176, 140, 9
+	AUTOCHECKBOX "Instancia única desde Jump List (&S)", IDC_OPTIONS_JUMPLISTKEEPSINGLETASK, 16, 188, 200, 9
+	GROUPBOX "", -1, 8, 176, 240, 28, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Desactivar protector de pantalla (&S)", IDC_OPTIONS_NOSCREENSAVER, 16, 224, 200, 9
+	AUTOCHECKBOX "Desactivar ahorro de energía del monitor (&L)", IDC_OPTIONS_NOMONITORLOWPOWER, 16, 236, 200, 9
+	AUTOCHECKBOX "Solo cuando esté activo (&C)", IDC_OPTIONS_NOMONITORLOWPOWERACTIVEONLY, 24, 248, 160, 9
+	GROUPBOX "Prevención de suspensión", -1, 8, 212, 240, 52, WS_CLIPSIBLINGS
+END
+
+IDD_OPTIONS_VIEW DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Visualización"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	AUTOCHECKBOX "Acoplar a bordes de ventana y pantalla (&P)", IDC_OPTIONS_SNAPATWINDOWEDGE, 8, 8, 236, 9
+	AUTOCHECKBOX "Soportar acoplamiento de ventana (Aero Snap) (&E)", IDC_OPTIONS_SUPPORTAEROSNAP, 8, 20, 236, 9
+	AUTOCHECKBOX "Ajustar al aspecto del video al redimensionar (&A)", IDC_OPTIONS_ADJUSTASPECTRESIZING, 8, 32, 236, 9
+	AUTOCHECKBOX "Anclar esquina más cercana al cambiar tamaño (&Z)", IDC_OPTIONS_NEARCORNERRESIZEORIGIN, 8, 44, 236, 9
+	AUTOCHECKBOX "Mantener aspecto de ventana al cambiar zoom (&K)", IDC_OPTIONS_ZOOMKEEPASPECTRATIO, 8, 56, 236, 9
+	LTEXT "Tamaño al cambiar Pan && Scan (&W):", -1, 8, 70, 140, 8
+	COMBOBOX IDC_OPTIONS_PANSCANADJUSTWINDOW, 152, 68, 96, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	AUTOCHECKBOX "Recordar tamaño de ventana en modo 1-Seg (&1)", IDC_OPTIONS_REMEMBER1SEGWINDOWSIZE, 8, 84, 236, 9
+	AUTOCHECKBOX "Minimizar a la bandeja del sistema (&T)", IDC_OPTIONS_MINIMIZETOTRAY, 8, 96, 236, 9
+	AUTOCHECKBOX "Detener reproducción al minimizar (&N)", IDC_OPTIONS_MINIMIZEDISABLEPREVIEW, 8, 108, 236, 9
+	AUTOCHECKBOX "Ocultar cursor sobre el video (&H)", IDC_OPTIONS_HIDECURSOR, 8, 120, 236, 9
+	AUTOCHECKBOX "Usar logo del canal como icono de ventana (&U)", IDC_OPTIONS_USELOGOICON, 8, 132, 236, 9
+	LTEXT "Formato de texto de barra de título (&B):", -1, 8, 146, 180, 8
+	EDITTEXT IDC_OPTIONS_TITLETEXTFORMAT, 16, 156, 216, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "▼", IDC_OPTIONS_TITLETEXTFORMAT_PARAMETERS, 236, 156, 12, 12
+	PUSHBUTTON "Preajustes", IDC_OPTIONS_TITLETEXTFORMAT_PRESETS, 16, 170, 56, 14
+	AUTOCHECKBOX "Fuente de título (&F)", IDC_OPTIONS_TITLEBARFONT_ENABLE, 8, 192, 104, 9
+	LTEXT "", IDC_OPTIONS_TITLEBARFONT_INFO, 116, 191, 116, 10, SS_SUNKEN
+	PUSHBUTTON "...", IDC_OPTIONS_TITLEBARFONT_CHOOSE, 236, 190, 12, 12
+	AUTOCHECKBOX "Mostrar logo (&G)", IDC_OPTIONS_SHOWLOGO, 8, 206, 104, 9
+	EDITTEXT IDC_OPTIONS_LOGOFILENAME, 116, 204, 116, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "...", IDC_OPTIONS_LOGOFILENAME_BROWSE, 236, 204, 12, 12
+END
+
+IDD_OPTIONS_OSD DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "OSD"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	AUTOCHECKBOX "Mostrar OSD (&O)", IDC_OSDOPTIONS_SHOWOSD, 12, 8, 84, 9
+	AUTOCHECKBOX "Componer sobre video (&M)", IDC_OSDOPTIONS_COMPOSITE, 16, 20, 140, 9
+	RTEXT "Color (&X):", IDC_OSDOPTIONS_TEXTCOLOR_LABEL, 16, 34, 44, 8
+	PUSHBUTTON "", IDC_OSDOPTIONS_TEXTCOLOR, 64, 32, 24, 12//, BS_OWNERDRAW
+	RTEXT "Fuente (&T):", IDC_OSDOPTIONS_OSDFONT_LABEL, 92, 34, 40, 8
+	LTEXT "", IDC_OSDOPTIONS_OSDFONT_INFO, 136, 33, 88, 10, SS_SUNKEN
+	PUSHBUTTON "...", IDC_OSDOPTIONS_OSDFONT_CHOOSE, 228, 32, 12, 12
+	RTEXT "Duración (&I):", IDC_OSDOPTIONS_FADETIME_LABEL, 16, 50, 44, 8
+	EDITTEXT IDC_OSDOPTIONS_FADETIME, 64, 48, 24, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_OSDOPTIONS_FADETIME_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 78, 48, 10, 12
+	LTEXT "seg", IDC_OSDOPTIONS_FADETIME_UNIT, 90, 50, 16, 8
+	LTEXT "Mostrar OSD al:", IDC_OSDOPTIONS_SHOW_LABEL, 16, 64, 120, 8
+	AUTOCHECKBOX "Cambiar canal", IDC_OSDOPTIONS_SHOW_CHANNEL, 20, 76, 64, 9
+	AUTOCHECKBOX "Volumen", IDC_OSDOPTIONS_SHOW_VOLUME, 88, 76, 44, 9
+	AUTOCHECKBOX "Audio", IDC_OSDOPTIONS_SHOW_AUDIO, 136, 76, 44, 9
+	AUTOCHECKBOX "Grabar", IDC_OSDOPTIONS_SHOW_RECORDING, 20, 88, 60, 9
+	AUTOCHECKBOX "Entrada Nº canal", IDC_OSDOPTIONS_SHOW_CHANNELNOINPUT, 88, 88, 96, 9
+	RTEXT "Visualiz. cambio canal (&C):", IDC_OSDOPTIONS_CHANNELCHANGE_TYPE_LABEL, 16, 102, 98, 8
+	COMBOBOX IDC_OSDOPTIONS_CHANNELCHANGE_TYPE, 120, 100, 104, 64, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Texto cambio canal (&H):", IDC_OSDOPTIONS_CHANNELCHANGE_TEXT_LABEL, 16, 118, 98, 8
+	EDITTEXT IDC_OSDOPTIONS_CHANNELCHANGE_TEXT, 120, 116, 104, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "▼", IDC_OSDOPTIONS_CHANNELCHANGE_TEXT_PARAMS, 228, 116, 12, 12
+	GROUPBOX "", IDC_OSDOPTIONS_GROUP, 8, 8, 240, 128, WS_CLIPSIBLINGS
+
+	RTEXT "Fuente (&F):", IDC_EVENTINFOOSD_FONT_LABEL, 16, 154, 44, 8
+	LTEXT "", IDC_EVENTINFOOSD_FONT_INFO, 64, 153, 160, 10, SS_SUNKEN
+	PUSHBUTTON "...", IDC_EVENTINFOOSD_FONT_CHOOSE, 228, 152, 12, 12
+	RTEXT "Duración (&D):", IDC_EVENTINFOOSD_DURATION_LABEL, 16, 170, 44, 8
+	EDITTEXT IDC_EVENTINFOOSD_DURATION, 64, 168, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_EVENTINFOOSD_DURATION_UPDOWN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 86, 168, 10, 12
+	LTEXT "seg", IDC_EVENTINFOOSD_DURATION_UNIT, 98, 170, 16, 8
+	AUTOCHECKBOX "Mostrar al cambiar de canal (&E)", IDC_EVENTINFOOSD_AUTOSHOW_CHANNELCHANGE, 16, 184, 216, 9
+	AUTOCHECKBOX "Mostrar al cambiar el programa (&V)", IDC_EVENTINFOOSD_AUTOSHOW_EVENTCHANGE, 16, 196, 216, 9
+	AUTOCHECKBOX "No ocultar automáticamente si fue manual (&U)", IDC_EVENTINFOOSD_MANUALSHOW_NOAUTOHIDE, 16, 208, 216, 9
+	GROUPBOX "OSD de información del programa", IDC_EVENTINFOOSD_GROUP, 8, 140, 240, 84, WS_CLIPSIBLINGS
+
+	RTEXT "Fuente (&N):", IDC_DISPLAYMENU_FONT_LABEL, 16, 242, 44, 8
+	LTEXT "", IDC_DISPLAYMENU_FONT_INFO, 64, 241, 160, 10, SS_SUNKEN
+	PUSHBUTTON "...", IDC_DISPLAYMENU_FONT_CHOOSE, 228, 240, 12, 12
+	AUTOCHECKBOX "Ajustar tamaño de fuente a la pantalla (&A)", IDC_DISPLAYMENU_AUTOFONTSIZE, 16, 256, 216, 9
+	GROUPBOX "Pantalla de inicio / Selector de canales", -1, 8, 228, 240, 44, WS_CLIPSIBLINGS
+END
+
+IDD_OPTIONS_NOTIFICATIONBAR DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Barra de notificaciones"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	AUTOCHECKBOX "Habilitar notificaciones (&B)", IDC_NOTIFICATIONBAR_ENABLE, 12, 8, 120, 9
+	AUTOCHECKBOX "Nombre del programa al cambiar (&P)", IDC_NOTIFICATIONBAR_NOTIFYEVENTNAME, 16, 20, 216, 9
+	AUTOCHECKBOX "Errores del procesador TS (&E)", IDC_NOTIFICATIONBAR_NOTIFYTSPROCESSORERROR, 16, 32, 216, 9
+	RTEXT "Duración (&D):", IDC_NOTIFICATIONBAR_DURATION_LABEL, 16, 46, 44, 8
+	EDITTEXT IDC_NOTIFICATIONBAR_DURATION, 64, 44, 24, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_NOTIFICATIONBAR_DURATION_UPDOWN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 78, 44, 10, 12
+	LTEXT "seg", IDC_NOTIFICATIONBAR_DURATION_UNIT, 90, 46, 16, 8
+	RTEXT "Fuente (&F):", IDC_NOTIFICATIONBAR_FONT_LABEL, 16, 62, 44, 8
+	LTEXT "", IDC_NOTIFICATIONBAR_FONT_INFO, 64, 61, 160, 10, SS_SUNKEN
+	PUSHBUTTON "...", IDC_NOTIFICATIONBAR_FONT_CHOOSE, 228, 60, 12, 12
+	GROUPBOX "", -1, 8, 8, 240, 72, WS_CLIPSIBLINGS
+END
+
+IDD_OPTIONS_STATUS DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Barra de estado"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	LTEXT "Elementos (&I):", -1, 8, 8, 52, 8
+	RTEXT "(Arrastre para mover o cambiar ancho)", -1, 64, 8, 184, 8
+	LISTBOX IDC_STATUSOPTIONS_ITEMLIST, 8, 20, 240, 182, LBS_OWNERDRAWFIXED | LBS_NOTIFY | LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+	PUSHBUTTON "Restaurar (&D)", IDC_STATUSOPTIONS_DEFAULT, 168, 206, 80, 14
+	LTEXT "Fuente (&F):", IDC_STATUSOPTIONS_FONTINFO_LABEL, 8, 226, 40, 8
+	LTEXT "", IDC_STATUSOPTIONS_FONTINFO, 52, 225, 180, 10, SS_SUNKEN
+	PUSHBUTTON "...", IDC_STATUSOPTIONS_CHOOSEFONT, 236, 224, 12, 12
+	AUTOCHECKBOX "Múltiples filas (&M)", IDC_STATUSOPTIONS_MULTIROW, 8, 242, 76, 9
+	RTEXT "Máx. filas (&X):", IDC_STATUSOPTIONS_MAXROWS_LABEL, 88, 242, 52, 8
+	EDITTEXT IDC_STATUSOPTIONS_MAXROWS, 144, 240, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_STATUSOPTIONS_MAXROWS_UPDOWN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 166, 240, 10, 12
+	AUTOCHECKBOX "Mostrar emergente (&P)", IDC_STATUSOPTIONS_SHOWPOPUP, 8, 256, 120, 9
+	RTEXT "Opacidad (Win8+) (&O):", IDC_STATUSOPTIONS_OPACITY_LABEL, 16, 270, 104, 8
+	CONTROL "", IDC_STATUSOPTIONS_OPACITY_SLIDER, TRACKBAR_CLASS, WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_AUTOTICKS, 124, 268, 76, 12
+	EDITTEXT IDC_STATUSOPTIONS_OPACITY_INPUT, 204, 268, 32, 12, ES_AUTOHSCROLL | ES_NUMBER
+	CONTROL "", IDC_STATUSOPTIONS_OPACITY_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 226, 268, 10, 12
+	LTEXT "%", IDC_STATUSOPTIONS_OPACITY_UNIT, 238, 270, 8, 8
+END
+
+IDD_OPTIONS_SIDEBAR DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Barra lateral"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	AUTOCHECKBOX "Mostrar emergente (&S)", IDC_SIDEBAR_SHOWPOPUP, 8, 8, 120, 9
+	RTEXT "Opacidad (Win8+) (&O):", IDC_SIDEBAR_OPACITY_LABEL, 16, 22, 104, 8
+	CONTROL "", IDC_SIDEBAR_OPACITY_SLIDER, TRACKBAR_CLASS, WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_AUTOTICKS, 124, 20, 76, 12
+	EDITTEXT IDC_SIDEBAR_OPACITY_INPUT, 204, 20, 32, 12, WS_CLIPSIBLINGS | ES_AUTOHSCROLL | ES_NUMBER
+	CONTROL "", IDC_SIDEBAR_OPACITY_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 226, 20, 10, 12
+	LTEXT "%", IDC_SIDEBAR_OPACITY_UNIT, 238, 22, 8, 8
+	AUTOCHECKBOX "Mostrar descripciones emergentes (&T)", IDC_SIDEBAR_SHOWTOOLTIPS, 8, 36, 220, 9
+	AUTOCHECKBOX "Usar logo del canal como icono (&L)", IDC_SIDEBAR_SHOWCHANNELLOGO, 8, 48, 220, 9
+	LTEXT "Elementos activos (&I):", IDC_SIDEBAR_ITEMLIST_LABEL, 8, 64, 110, 8
+	CONTROL "", IDC_SIDEBAR_ITEMLIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER | LVS_SHAREIMAGELISTS, 8, 76, 118, 168
+	PUSHBUTTON "Subir (&U)", IDC_SIDEBAR_UP, 8, 248, 48, 14, WS_DISABLED
+	PUSHBUTTON "Bajar (&D)", IDC_SIDEBAR_DOWN, 8, 266, 48, 14, WS_DISABLED
+	PUSHBUTTON "Quitar (&R)", IDC_SIDEBAR_REMOVE, 64, 248, 48, 14, WS_DISABLED
+	PUSHBUTTON "Defecto (&E)", IDC_SIDEBAR_DEFAULT, 64, 266, 48, 14
+	LTEXT "Elementos disponibles (&C):", IDC_SIDEBAR_COMMANDLIST_LABEL, 130, 64, 110, 8
+	CONTROL "", IDC_SIDEBAR_COMMANDLIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER | LVS_SHAREIMAGELISTS, 130, 76, 118, 168
+	PUSHBUTTON "Añadir (&A)", IDC_SIDEBAR_ADD, 130, 248, 48, 14, WS_DISABLED
+	PUSHBUTTON "Separador", IDC_SIDEBAR_SEPARATOR, 130, 266, 48, 14
+END
+
+IDD_OPTIONS_MENU DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Menú"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	RTEXT "Máx. filas del menú canales (&C):", -1, 8, 10, 112, 9
+	EDITTEXT IDC_MENUOPTIONS_MAXCHANNELMENUROWS, 124, 8, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_MENUOPTIONS_MAXCHANNELMENUROWS_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 146, 8, 10, 12
+	RTEXT "Máx. canales con info EPG (&E):", -1, 8, 26, 112, 9
+	EDITTEXT IDC_MENUOPTIONS_MAXCHANNELMENUEVENTINFO, 124, 24, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_MENUOPTIONS_MAXCHANNELMENUEVENTINFO_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 146, 24, 10, 12
+
+	LTEXT "Elementos del menú (&V):", -1, 8, 44, 120, 8
+	CONTROL "", IDC_MENUOPTIONS_ITEMLIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, 8, 56, 180, 224
+	PUSHBUTTON "Subir (&U)", IDC_MENUOPTIONS_ITEMLIST_UP, 192, 56, 56, 14, WS_DISABLED
+	PUSHBUTTON "Bajar (&D)", IDC_MENUOPTIONS_ITEMLIST_DOWN, 192, 74, 56, 14, WS_DISABLED
+	PUSHBUTTON "+ Separador", IDC_MENUOPTIONS_ITEMLIST_INSERTSEPARATOR, 192, 96, 56, 14, WS_DISABLED
+	PUSHBUTTON "- Separador", IDC_MENUOPTIONS_ITEMLIST_REMOVESEPARATOR, 192, 114, 56, 14, WS_DISABLED
+	PUSHBUTTON "Defecto (&E)", IDC_MENUOPTIONS_ITEMLIST_DEFAULT, 192, 266, 56, 14
+END
+
+IDD_OPTIONS_PANEL DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Panel"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	AUTOCHECKBOX "Acoplar al borde de la ventana principal (&S)", IDC_PANELOPTIONS_SNAPATMAINWINDOW, 8, 8, 236, 9
+	AUTOCHECKBOX "Mover/redimensionar junto a ventana principal (&A)", IDC_PANELOPTIONS_ATTACHTOMAINWINDOW, 8, 20, 236, 9
+	RTEXT "Opacidad (&O):", -1, 8, 34, 52, 8
+	CONTROL "", IDC_PANELOPTIONS_OPACITY_TB, TRACKBAR_CLASS, WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_AUTOTICKS, 64, 32, 132, 12
+	EDITTEXT IDC_PANELOPTIONS_OPACITY_EDIT, 196, 32, 32, 12, WS_CLIPSIBLINGS | ES_AUTOHSCROLL | ES_NUMBER
+	CONTROL "", IDC_PANELOPTIONS_OPACITY_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 218, 32, 10, 12
+	LTEXT "%", -1, 230, 34, 8, 8
+	RTEXT "Fuente (&F):", -1, 8, 48, 76, 8
+	LTEXT "", IDC_PANELOPTIONS_FONTINFO, 88, 47, 144, 10, SS_SUNKEN
+	PUSHBUTTON "...", IDC_PANELOPTIONS_CHOOSEFONT, 236, 46, 12, 12
+	AUTOCHECKBOX "Fuente subtít. (&C):", IDC_PANELOPTIONS_SPECCAPTIONFONT, 8, 64, 76, 9, BS_RIGHT | BS_RIGHTBUTTON
+	LTEXT "", IDC_PANELOPTIONS_CAPTIONFONT_INFO, 88, 63, 144, 10, SS_SUNKEN
+	PUSHBUTTON "...", IDC_PANELOPTIONS_CAPTIONFONT_CHOOSE, 236, 62, 12, 12
+
+	CONTROL "", IDC_PANELOPTIONS_ITEMLIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_NOCOLUMNHEADER | LVS_SHOWSELALWAYS, 16, 92, 172, 80
+	PUSHBUTTON "Subir (&U)", IDC_PANELOPTIONS_ITEMLIST_UP, 192, 92, 48, 14, WS_DISABLED
+	PUSHBUTTON "Bajar (&D)", IDC_PANELOPTIONS_ITEMLIST_DOWN, 192, 110, 48, 14, WS_DISABLED
+	RTEXT "Pestaña inicial (&T):", -1, 8, 186, 76, 8
+	COMBOBOX IDC_PANELOPTIONS_FIRSTTAB, 88, 184, 96, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	RTEXT "Estilo de pestaña (&Y):", -1, 8, 202, 76, 8
+	COMBOBOX IDC_PANELOPTIONS_TABSTYLE, 88, 200, 96, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	AUTOCHECKBOX "Mostrar descripción en pestañas (&L)", IDC_PANELOPTIONS_TABTOOLTIP, 8, 216, 220, 9
+	GROUPBOX "Pestañas (&I):", -1, 8, 80, 240, 100, WS_CLIPSIBLINGS
+END
+
+IDD_OPTIONS_COLORSCHEME DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Tema / Colores"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	COMBOBOX IDC_COLORSCHEME_PRESET, 8, 8, 120, 128, CBS_DROPDOWNLIST | CBS_OWNERDRAWFIXED | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+	PUSHBUTTON "Guardar (&S)...", IDC_COLORSCHEME_SAVE, 132, 8, 56, 14
+	PUSHBUTTON "Borrar (&D)", IDC_COLORSCHEME_DELETE, 192, 8, 56, 14
+	LISTBOX IDC_COLORSCHEME_LIST, 8, 36, 120, 244, LBS_OWNERDRAWFIXED | LBS_NOINTEGRALHEIGHT | LBS_EXTENDEDSEL | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+	LTEXT "", IDC_COLORSCHEME_PALETTEPLACE, 132, 36, 116, 218, NOT WS_VISIBLE
+	PUSHBUTTON "Vista previa", IDC_COLORSCHEME_PREVIEW, 192, 266, 56, 14
+END
+
+IDD_SAVECOLORSCHEME DIALOG 96, 48, 192, 70
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Guardar tema"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	LTEXT "Ingrese el nombre del tema.\n(No use caracteres inválidos para nombres de archivo)", -1, 8, 8, 176, 16
+	EDITTEXT IDC_SAVECOLORSCHEME_NAME, 8, 28, 176, 12, ES_AUTOHSCROLL
+	DEFPUSHBUTTON "Aceptar", IDOK, 84, 48, 48, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 136, 48, 48, 14
+END
+
+IDD_OPTIONS_OPERATION DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Operación"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	AUTOCHECKBOX "Arrastrar el video para mover la ventana (&P)", IDC_OPTIONS_DISPLAYDRAGMOVE, 8, 8, 236, 9
+
+	RTEXT "Rueda (&W):", -1, 16, 38, 44, 8
+	COMBOBOX IDC_OPTIONS_WHEELMODE, 64, 36, 80, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "+Shift (&S):", -1, 16, 54, 44, 8
+	COMBOBOX IDC_OPTIONS_WHEELSHIFTMODE, 64, 52, 80, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "+Ctrl (&C):", -1, 16, 70, 44, 8
+	COMBOBOX IDC_OPTIONS_WHEELCTRLMODE, 64, 68, 80, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Inclinac. (&T):", -1, 16, 86, 44, 8
+	COMBOBOX IDC_OPTIONS_WHEELTILTMODE, 64, 84, 80, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	AUTOCHECKBOX "Invertir dirección de volumen (&E)", IDC_OPTIONS_WHEELVOLUMEREVERSE, 16, 100, 200, 9
+	AUTOCHECKBOX "Invertir dirección de cambio de canal (&R)", IDC_OPTIONS_WHEELCHANNELREVERSE, 16, 112, 200, 9
+	LTEXT "Espera al cambiar canal (&L):", -1, 16, 126, 112, 8
+	EDITTEXT IDC_OPTIONS_WHEELCHANNELDELAY, 132, 124, 32, 12, ES_NUMBER | ES_AUTOHSCROLL
+	LTEXT "ms (100~)", -1, 166, 126, 40, 8
+	AUTOCHECKBOX "Acción según elemento bajo cursor en barra estado (&A)", IDC_OPTIONS_STATUSBARWHEEL, 16, 140, 224, 9
+	GROUPBOX "Rueda del ratón", -1, 8, 24, 240, 132, WS_CLIPSIBLINGS
+
+	RTEXT "Doble clic izq. (&D):", -1, 16, 174, 64, 8
+	COMBOBOX IDC_OPTIONS_LEFTDOUBLECLICKCOMMAND, 84, 172, 156, 128, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	RTEXT "Clic derecho (&I):", -1, 16, 190, 64, 8
+	COMBOBOX IDC_OPTIONS_RIGHTCLICKCOMMAND, 84, 188, 156, 128, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	RTEXT "Clic central (&M):", -1, 16, 206, 64, 8
+	COMBOBOX IDC_OPTIONS_MIDDLECLICKCOMMAND, 84, 204, 156, 128, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	GROUPBOX "Botones del ratón", -1, 8, 160, 240, 64, WS_CLIPSIBLINGS
+
+	LTEXT "Paso de volumen (&V):", -1, 8, 234, 80, 8
+	EDITTEXT IDC_OPTIONS_VOLUMESTEP, 92, 232, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_OPTIONS_VOLUMESTEP_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 114, 232, 10, 12
+	LTEXT "%", -1, 126, 234, 8, 8
+
+	LTEXT "Paso sinc. audio (&Y):", -1, 8, 250, 80, 8
+	EDITTEXT IDC_OPTIONS_AUDIODELAYSTEP, 92, 248, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_OPTIONS_AUDIODELAYSTEP_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 114, 248, 10, 12
+	LTEXT "ms", -1, 126, 250, 16, 8
+
+	LTEXT "Orden cambio canal (&N):", -1, 148, 232, 96, 8
+	COMBOBOX IDC_OPTIONS_CHANNELUPDOWNORDER, 152, 244, 96, 32, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	AUTOCHECKBOX "Omitir subcanales (&B)", IDC_OPTIONS_SKIPSUBCHANNEL, 152, 260, 96, 9
+END
+
+IDD_OPTIONS_ACCELERATOR  DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Atajos de teclado"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	CONTROL "", IDC_ACCELERATOR_LIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | /*WS_CLIPSIBLINGS | */WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER, 16, 20, 172, 230
+	AUTOCHECKBOX "Shift", IDC_ACCELERATOR_SHIFT, 192, 20, 48, 9
+	AUTOCHECKBOX "Ctrl", IDC_ACCELERATOR_CONTROL, 192, 32, 48, 9
+	AUTOCHECKBOX "Alt", IDC_ACCELERATOR_ALT, 192, 44, 48, 9
+	COMBOBOX IDC_ACCELERATOR_KEY, 192, 56, 48, 128, WS_TABSTOP | WS_VSCROLL | CBS_DROPDOWNLIST
+	AUTOCHECKBOX "Global", IDC_ACCELERATOR_GLOBAL, 192, 72, 48, 9
+	COMBOBOX IDC_ACCELERATOR_APPCOMMAND, 16, 0, 0, 0, WS_CHILD | NOT WS_VISIBLE | WS_VSCROLL | CBS_DROPDOWNLIST
+	LTEXT "*Para teclas multimedia, seleccione la acción y pulse la tecla.", IDC_ACCELERATOR_NOTE, 192, 88, 52, 64
+	PUSHBUTTON "Defecto (&D)", IDC_ACCELERATOR_DEFAULT, 192, 236, 48, 14
+	GROUPBOX "Atajos de teclado", IDC_ACCELERATOR_GROUP, 8, 8, 240, 250, WS_CLIPSIBLINGS
+
+	PUSHBUTTON "Entrada de Nº de canal (&C)...", IDC_ACCELERATOR_CHANNELINPUTOPTIONS, 8, 266, 120, 14
+END
+
+IDD_OPTIONS_CONTROLLER DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Control remoto"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	LTEXT "Controlador (&C):", -1, 8, 10, 56, 8
+	COMBOBOX IDC_CONTROLLER_LIST, 68, 8, 112, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	AUTOCHECKBOX "Solo con ventana activa (&A)", IDC_CONTROLLER_ACTIVEONLY, 8, 24, 140, 9
+	LTEXT "Asignación de botones (&B):", IDC_CONTROLLER_ASSIGN_LABEL, 76, 36, 112, 8
+	CONTROL "", IDC_CONTROLLER_ASSIGN, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER, 76, 48, 172, 216
+	PUSHBUTTON "Defecto (&D)", IDC_CONTROLLER_DEFAULT, 200, 30, 48, 14
+	COMBOBOX IDC_CONTROLLER_COMMAND, 76, 268, 172, 128, CBS_DROPDOWNLIST | WS_TABSTOP | WS_VSCROLL
+	LTEXT "", IDC_CONTROLLER_IMAGEPLACE, 8, 48, 60, 232, NOT WS_VISIBLE
+END
+
+IDD_OPTIONS_DRIVER DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Ajustes de BonDriver"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	LTEXT "BonDriver (&B):", -1, 8, 10, 52, 8
+	COMBOBOX IDC_DRIVEROPTIONS_DRIVERLIST, 64, 8, 184, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+
+	AUTORADIOBUTTON "Sin especificar (&N)", IDC_DRIVEROPTIONS_INITCHANNEL_NONE, 16, 40, 120, 9, WS_GROUP
+	AUTORADIOBUTTON "Último canal visto (&L)", IDC_DRIVEROPTIONS_INITCHANNEL_LAST, 16, 52, 140, 9
+	AUTORADIOBUTTON "Espacio/canal específico (&S)", IDC_DRIVEROPTIONS_INITCHANNEL_CUSTOM, 16, 64, 180, 9
+	COMBOBOX IDC_DRIVEROPTIONS_INITCHANNEL_SPACE, 24, 76, 80, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP | WS_GROUP
+	COMBOBOX IDC_DRIVEROPTIONS_INITCHANNEL_CHANNEL, 108, 76, 132, 160, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	GROUPBOX "Canal inicial (&C)", IDC_DRIVEROPTIONS_INITCHANNEL_GROUP, 8, 28, 240, 68, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "No obtener nivel de señal (&I)", IDC_DRIVEROPTIONS_NOSIGNALLEVEL, 8, 104, 236, 9
+	AUTOCHECKBOX "Ignorar stream antes de sintonizar primer canal (&G)", IDC_DRIVEROPTIONS_IGNOREINITIALSTREAM, 8, 116, 236, 9
+	AUTOCHECKBOX "Descartar stream al cambiar de canal (&P)", IDC_DRIVEROPTIONS_PURGESTREAMONCHANNELCHANGE, 8, 128, 236, 9
+	AUTOCHECKBOX "Reiniciar contador de errores al cambiar canal (&R)", IDC_DRIVEROPTIONS_RESETCHANNELCHANGEERRORCOUNT, 8, 140, 236, 9
+	AUTOCHECKBOX "Sincronizar lectura de stream con reprod. (archivos) (&Y)", IDC_DRIVEROPTIONS_PUMPSTREAMSYNCPLAYBACK, 8, 152, 236, 9
+	RTEXT "Espera inicial de sintonía (&D):", IDC_DRIVEROPTIONS_FIRSTCHANNELSETDELAY_LABEL, 8, 170, 112, 8
+	EDITTEXT IDC_DRIVEROPTIONS_FIRSTCHANNELSETDELAY, 124, 168, 32, 12, WS_CLIPSIBLINGS | ES_AUTOHSCROLL | ES_NUMBER
+	CONTROL "", IDC_DRIVEROPTIONS_FIRSTCHANNELSETDELAY_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 146, 168, 10, 12
+	LTEXT "ms (0~%u)", IDC_DRIVEROPTIONS_FIRSTCHANNELSETDELAY_UNIT, 158, 170, 48, 8
+	RTEXT "Intervalo mín. cambio canal (&M):", IDC_DRIVEROPTIONS_MINCHANNELCHANGEINTERVAL_LABEL, 8, 186, 112, 8
+	EDITTEXT IDC_DRIVEROPTIONS_MINCHANNELCHANGEINTERVAL, 124, 184, 32, 12, WS_CLIPSIBLINGS | ES_AUTOHSCROLL | ES_NUMBER
+	CONTROL "", IDC_DRIVEROPTIONS_MINCHANNELCHANGEINTERVAL_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 146, 184, 10, 12
+	LTEXT "ms (0~%u)", IDC_DRIVEROPTIONS_MINCHANNELCHANGEINTERVAL_UNIT, 158, 186, 48, 8
+END
+
+IDD_OPTIONS_VIDEO DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Video"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	RTEXT "Decodif. MPEG-2 (&M):", -1, 8, 10, 80, 8
+	COMBOBOX IDC_OPTIONS_MPEG2DECODER, 92, 8, 156, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Decodif. H.264/AVC (&H):", -1, 8, 26, 80, 8
+	COMBOBOX IDC_OPTIONS_H264DECODER, 92, 24, 156, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Decodif. H.265/HEVC (&V):", -1, 8, 42, 80, 8
+	COMBOBOX IDC_OPTIONS_H265DECODER, 92, 40, 156, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Renderizador video (&R):", -1, 8, 58, 80, 8
+	COMBOBOX IDC_OPTIONS_RENDERER, 92, 56, 96, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+
+	AUTOCHECKBOX "Restablecer Pan && Scan al cambiar programa (&E)", IDC_OPTIONS_RESETPANSCANEVENTCHANGE, 8, 76, 236, 9
+	AUTOCHECKBOX "No enmascarar bordes en recorte lateral (&O)", IDC_OPTIONS_NOMASKSIDECUT, 8, 88, 236, 9
+	AUTOCHECKBOX "Recortar a relación de pantalla en pantalla completa (&F)", IDC_OPTIONS_FULLSCREENCUTFRAME, 8, 100, 236, 9
+	AUTOCHECKBOX "Recortar a relación de pantalla al maximizar (&A)", IDC_OPTIONS_MAXIMIZECUTFRAME, 8, 112, 236, 9
+	AUTOCHECKBOX "Ignorar tamaño de pantalla en cabecera extendida (&I)", IDC_OPTIONS_IGNOREDISPLAYSIZE, 8, 124, 236, 9
+	AUTOCHECKBOX "Recortar al cruzar múltiples monitores (EVR) (&C)", IDC_OPTIONS_CLIPTODEVICE, 8, 136, 236, 9
+END
+
+IDD_OPTIONS_AUDIO DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Audio"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	RTEXT "Disp. de audio (&D):", -1, 8, 10, 56, 8
+	COMBOBOX IDC_OPTIONS_AUDIODEVICE, 68, 8, 180, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Filtro de audio (&F):", -1, 8, 26, 56, 8
+	COMBOBOX IDC_OPTIONS_AUDIOFILTER, 68, 24, 180, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Decodif. AAC (&C):", -1, 8, 42, 56, 8
+	COMBOBOX IDC_OPTIONS_AACDECODER, 68, 40, 128, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+
+	RTEXT "Modo Passthrough (&T):", -1, 16, 74, 72, 8
+	COMBOBOX IDC_OPTIONS_SPDIFMODE, 92, 72, 148, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	LTEXT "Cambiar automáticamente a passthrough en:", IDC_OPTIONS_SPDIF_CHANNELS_LABEL, 16, 88, 200, 8
+	AUTOCHECKBOX "Mono", IDC_OPTIONS_SPDIF_CHANNELS_MONO, 24, 100, 40, 9
+	AUTOCHECKBOX "Dual", IDC_OPTIONS_SPDIF_CHANNELS_DUALMONO, 72, 100, 40, 9
+	AUTOCHECKBOX "Estéreo", IDC_OPTIONS_SPDIF_CHANNELS_STEREO, 120, 100, 44, 9
+	AUTOCHECKBOX "5.1ch", IDC_OPTIONS_SPDIF_CHANNELS_SURROUND, 168, 100, 40, 9
+	GROUPBOX "S/PDIF Passthrough", -1, 8, 60, 240, 56, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Mezclar audio 5.1ch a estéreo (Downmix) (&X)", IDC_OPTIONS_DOWNMIXSURROUND, 16, 136, 220, 9
+	PUSHBUTTON "Ajustes 5.1ch (&5)...", IDC_OPTIONS_SURROUNDOPTIONS, 16, 148, 80, 14
+	GROUPBOX "Surround", -1, 8, 124, 240, 48, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Prioridad de idioma de audio (&L)", IDC_OPTIONS_ENABLEAUDIOLANGUAGEPRIORITY, 12, 180, 140, 9
+	LISTBOX IDC_OPTIONS_AUDIOLANGUAGEPRIORITY, 16, 192, 80, 76, LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_HSCROLL | WS_TABSTOP
+	PUSHBUTTON "Añadir (&A)", IDC_OPTIONS_AUDIOLANGUAGEPRIORITY_ADD, 100, 192, 48, 14
+	PUSHBUTTON "Quitar (&R)", IDC_OPTIONS_AUDIOLANGUAGEPRIORITY_REMOVE, 100, 214, 48, 14
+	PUSHBUTTON "Subir (&U)", IDC_OPTIONS_AUDIOLANGUAGEPRIORITY_UP, 100, 236, 48, 14
+	PUSHBUTTON "Bajar (&W)", IDC_OPTIONS_AUDIOLANGUAGEPRIORITY_DOWN, 100, 254, 48, 14
+	COMBOBOX IDC_OPTIONS_AUDIOLANGUAGELIST, 152, 192, 88, 120, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	GROUPBOX "", -1, 8, 180, 240, 96, WS_CLIPSIBLINGS
+END
+
+IDD_OPTIONS_PLAYBACK DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Reproducción"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	AUTOCHECKBOX "Restaurar silencio al iniciar (&M)", IDC_OPTIONS_RESTOREMUTE, 8, 8, 236, 9
+	AUTOCHECKBOX "Restaurar estado de reproducción desactivada (&E)", IDC_OPTIONS_RESTOREPLAYSTATUS, 8, 20, 236, 9
+	AUTOCHECKBOX "Restaurar modo 1-Seg al iniciar (&1)", IDC_OPTIONS_RESTORE1SEGMODE, 8, 32, 236, 9
+
+	AUTOCHECKBOX "Resolución mínima de temporizador (&R)", IDC_OPTIONS_MINTIMERRESOLUTION, 8, 48, 152, 9
+	AUTOCHECKBOX "Ajustar tiempo de muestras de audio (&S)", IDC_OPTIONS_ADJUSTAUDIOSTREAMTIME, 8, 60, 152, 9
+	AUTOCHECKBOX "Sincronizar PTS de video y audio (&P)", IDC_OPTIONS_PTSSYNC, 8, 72, 152, 9
+	AUTOCHECKBOX "No usar reloj del render. de audio (&C)", IDC_OPTIONS_USEDEMUXERCLOCK, 8, 84, 152, 9
+	LTEXT "*Si hay desincronía o cortes en audio/video, ajuste estas opciones y el búfer.", -1, 164, 48, 84, 44
+
+	RTEXT "Tamaño máx. búfer (&Z):", IDC_OPTIONS_BUFFERSIZE_LABEL, 16, 114, 72, 8
+	EDITTEXT IDC_OPTIONS_BUFFERSIZE, 92, 112, 40, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_OPTIONS_BUFFERSIZE_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 122, 112, 10, 12
+	LTEXT "paquetes", IDC_OPTIONS_BUFFERSIZE_UNIT, 134, 114, 40, 8
+	AUTOCHECKBOX "Almacenar antes de reproducir (&B)", IDC_OPTIONS_ENABLEBUFFERING, 16, 130, 144, 9
+	RTEXT "Nivel (&U):", IDC_OPTIONS_BUFFERPOOLPERCENTAGE_LABEL, 164, 130, 32, 8
+	EDITTEXT IDC_OPTIONS_BUFFERPOOLPERCENTAGE, 200, 128, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_OPTIONS_BUFFERPOOLPERCENTAGE_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 222, 130, 10, 12
+	LTEXT "%", IDC_OPTIONS_BUFFERPOOLPERCENTAGE_UNIT, 234, 130, 8, 8
+	GROUPBOX "Búfer", -1, 8, 100, 240, 48, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Ajustar tasa de cuadros (framerate) (&A)", IDC_OPTIONS_ADJUSTFRAMERATE, 16, 168, 200, 9
+	GROUPBOX "1-Seg", -1, 8, 156, 240, 32, WS_CLIPSIBLINGS
+
+	LTEXT "Prioridad del hilo de stream (&O):", -1, 8, 198, 104, 8
+	COMBOBOX IDC_OPTIONS_STREAMTHREADPRIORITY, 116, 196, 80, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_OPTIONS_RECORD DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Grabación"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	RTEXT "Carpeta destino (&F):", -1, 8, 10, 60, 8
+	EDITTEXT IDC_RECORDOPTIONS_SAVEFOLDER, 72, 8, 160, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "...", IDC_RECORDOPTIONS_SAVEFOLDER_BROWSE, 236, 8, 12, 12
+	RTEXT "Nombre archivo (&N):", -1, 8, 26, 60, 8
+	EDITTEXT IDC_RECORDOPTIONS_FILENAME, 72, 24, 160, 12, ES_AUTOHSCROLL | ES_NOHIDESEL
+	PUSHBUTTON "▼", IDC_RECORDOPTIONS_FILENAMEFORMAT, 236, 24, 12, 12
+	RTEXT "Vista previa:", -1, 8, 40, 60, 8
+	EDITTEXT IDC_RECORDOPTIONS_FILENAMEPREVIEW, 72, 40, 176, 8, ES_READONLY | ES_AUTOHSCROLL | NOT WS_BORDER
+	AUTOCHECKBOX "Confirmar cambio de canal durante grabación (&C)", IDC_RECORDOPTIONS_CONFIRMCHANNELCHANGE, 8, 52, 236, 9
+	AUTOCHECKBOX "Confirmar salida durante grabación (&X)", IDC_RECORDOPTIONS_CONFIRMEXIT, 8, 64, 236, 9
+	AUTOCHECKBOX "Confirmar detención de grabación (&T)", IDC_RECORDOPTIONS_CONFIRMSTOP, 8, 76, 236, 9
+	AUTOCHECKBOX "Confirmar solo al detener desde barra de estado (&R)", IDC_RECORDOPTIONS_CONFIRMSTATUSBARSTOP, 16, 88, 228, 9
+	AUTOCHECKBOX "Advertir cuando quede poco espacio en disco (&W)", IDC_RECORDOPTIONS_ALERTLOWFREESPACE, 8, 100, 236, 9
+	RTEXT "Menos de", IDC_RECORDOPTIONS_LOWFREESPACETHRESHOLD_LABEL, 16, 114, 40, 8
+	EDITTEXT IDC_RECORDOPTIONS_LOWFREESPACETHRESHOLD, 60, 112, 40, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_RECORDOPTIONS_LOWFREESPACETHRESHOLD_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 90, 112, 10, 12
+	LTEXT "MiB disponibles", IDC_RECORDOPTIONS_LOWFREESPACETHRESHOLD_UNIT, 104, 114, 80, 8
+	LTEXT "Clic en grabar en barra de estado (&S):", -1, 8, 130, 128, 8
+	COMBOBOX IDC_RECORDOPTIONS_STATUSBARCOMMAND, 140, 128, 92, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+
+	AUTOCHECKBOX "Guardar solo el servicio actual (&V)", IDC_RECORDOPTIONS_CURSERVICEONLY, 8, 144, 236, 9
+	AUTOCHECKBOX "Guardar subtítulos (&U)", IDC_RECORDOPTIONS_SAVESUBTITLE, 8, 156, 236, 9
+	AUTOCHECKBOX "Guardar carrusel de datos (&A)", IDC_RECORDOPTIONS_SAVEDATACARROUSEL, 8, 168, 236, 9
+	LTEXT "Plugin de guardado (&L):", -1, 8, 182, 64, 8
+	COMBOBOX IDC_RECORDOPTIONS_WRITEPLUGIN, 76, 180, 136, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	PUSHBUTTON "Config...", IDC_RECORDOPTIONS_WRITEPLUGINSETTING, 216, 179, 32, 14, WS_DISABLED
+
+	RTEXT "Memoria grab. retroactiva (&H):", -1, 8, 202, 108, 8
+	EDITTEXT IDC_RECORDOPTIONS_TIMESHIFTBUFFERSIZE, 120, 200, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_RECORDOPTIONS_TIMESHIFTBUFFERSIZE_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 142, 200, 10, 12
+	LTEXT "MiB (1~1024)", -1, 154, 202, 52, 8
+	RTEXT "Bloque escritura disco (&B):", -1, 8, 218, 108, 8
+	EDITTEXT IDC_RECORDOPTIONS_BUFFERSIZE, 120, 216, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_RECORDOPTIONS_BUFFERSIZE_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 142, 216, 10, 12
+	LTEXT "KiB (1~32768)", -1, 154, 218, 56, 8
+	RTEXT "Límite cola de escritura (&P):", -1, 8, 234, 108, 8
+	EDITTEXT IDC_RECORDOPTIONS_MAXPENDINGSIZE, 120, 232, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_RECORDOPTIONS_MAXPENDINGSIZE_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 142, 232, 10, 12
+	LTEXT "MiB (32~1024)", -1, 154, 234, 56, 8
+END
+
+IDD_OPTIONS_CAPTURE DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Captura"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	RTEXT "Carpeta destino (&F):", -1, 8, 10, 64, 8
+	EDITTEXT IDC_CAPTUREOPTIONS_SAVEFOLDER, 76, 8, 156, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "...", IDC_CAPTUREOPTIONS_SAVEFOLDER_BROWSE, 236, 8, 12, 12
+	RTEXT "Nombre archivo (&N):", -1, 8, 26, 64, 8
+	EDITTEXT IDC_CAPTUREOPTIONS_FILENAME, 76, 24, 156, 12, ES_AUTOHSCROLL | ES_NOHIDESEL
+	PUSHBUTTON "▼", IDC_CAPTUREOPTIONS_FILENAME_PARAMETERS, 236, 24, 12, 12
+	RTEXT "Vista previa:", -1, 8, 40, 64, 8
+	EDITTEXT IDC_CAPTUREOPTIONS_FILENAME_PREVIEW, 76, 40, 156, 8, ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+	RTEXT "Tamaño (&S):", -1, 8, 54, 64, 8
+	COMBOBOX IDC_CAPTUREOPTIONS_SIZE, 76, 52, 96, 128, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Formato (&O):", -1, 8, 70, 64, 8
+	COMBOBOX IDC_CAPTUREOPTIONS_FORMAT, 76, 68, 64, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	RTEXT "Calidad JPEG (&Q):", -1, 8, 86, 64, 8
+	CONTROL "", IDC_CAPTUREOPTIONS_JPEGQUALITY_TB, TRACKBAR_CLASS, WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_AUTOTICKS, 76, 84, 112, 12
+	EDITTEXT IDC_CAPTUREOPTIONS_JPEGQUALITY_EDIT, 192, 84, 32, 12, WS_CLIPSIBLINGS | ES_AUTOHSCROLL | ES_NUMBER
+	CONTROL "", IDC_CAPTUREOPTIONS_JPEGQUALITY_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 214, 84, 10, 12
+	RTEXT "Compresión PNG (&L):", -1, 8, 102, 64, 8
+	CONTROL "", IDC_CAPTUREOPTIONS_PNGLEVEL_TB, TRACKBAR_CLASS, WS_CHILD | WS_VISIBLE | WS_TABSTOP | TBS_AUTOTICKS, 76, 100, 112, 12
+	EDITTEXT IDC_CAPTUREOPTIONS_PNGLEVEL_EDIT, 192, 100, 32, 12, WS_CLIPSIBLINGS | ES_AUTOHSCROLL | ES_NUMBER
+	CONTROL "", IDC_CAPTUREOPTIONS_PNGLEVEL_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 214, 100, 10, 12
+	AUTOCHECKBOX "Guardar en archivo al pulsar icono de captura (&I)", IDC_CAPTUREOPTIONS_ICONSAVEFILE, 8, 116, 236, 9
+	AUTOCHECKBOX "Añadir comentario (&C)", IDC_CAPTUREOPTIONS_SETCOMMENT, 8, 128, 140, 9
+	EDITTEXT IDC_CAPTUREOPTIONS_COMMENT, 16, 140, 216, 64, ES_MULTILINE | ES_AUTOHSCROLL | ES_AUTOVSCROLL | ES_NOHIDESEL | WS_HSCROLL | WS_VSCROLL
+	PUSHBUTTON "▼", IDC_CAPTUREOPTIONS_COMMENT_PARAMETERS, 236, 140, 12, 12
+END
+
+IDD_OPTIONS_CHANNELSCAN DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Escaneo de canales"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	LTEXT "Espacio de sintonía (&T):", -1, 8, 10, 84, 8
+	COMBOBOX IDC_CHANNELSCAN_SPACE, 96, 8, 152, 64, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	LTEXT "Lista de canales (&C):", IDC_CHANNELSCAN_CHANNELLIST_LABEL, 8, 24, 100, 8
+	CONTROL "", IDC_CHANNELSCAN_CHANNELLIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_EDITLABELS, 8, 36, 240, 200
+	AUTOCHECKBOX "Buscar servicios (&V)", IDC_CHANNELSCAN_SCANSERVICE, 8, 240, 140, 9
+	AUTOCHECKBOX "Ignorar nivel de señal (&L)", IDC_CHANNELSCAN_IGNORESIGNALLEVEL, 8, 252, 140, 9
+	PUSHBUTTON "Ajustes de escaneo (&E)", IDC_CHANNELSCAN_SETTINGS, 8, 264, 88, 14
+	PUSHBUTTON "Cargar preajuste (&P)", IDC_CHANNELSCAN_LOADPRESET, 168, 240, 80, 14
+	PUSHBUTTON "Iniciar escaneo (&S)", IDC_CHANNELSCAN_START, 168, 264, 80, 16
+END
+
+IDD_CHANNELSCAN DIALOG 44, 44, 192, 94
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Escaneando canales..."
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Finalizar", IDOK, 68, 72, 56, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 128, 72, 56, 14
+	LTEXT "", IDC_CHANNELSCAN_INFO, 8, 8, 176, 8
+	CONTROL "", IDC_CHANNELSCAN_PROGRESS, PROGRESS_CLASS, WS_CHILD | WS_VISIBLE, 8, 20, 176, 8
+	CTEXT "", IDC_CHANNELSCAN_CHANNEL, 8, 32, 88, 8, SS_ENDELLIPSIS | SS_NOPREFIX
+	RTEXT "", IDC_CHANNELSCAN_LEVEL, 104, 32, 80, 8
+	LTEXT "", IDC_CHANNELSCAN_GRAPH, 8, 44, 176, 20, SS_OWNERDRAW
+END
+
+IDD_CHANNELPROPERTIES DIALOG 0, 0, 204, 128
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Propiedades del canal"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	RTEXT "Nombre (&N):", -1, 8, 10, 56, 8
+	EDITTEXT IDC_CHANNELPROP_NAME, 68, 8, 128, 12, ES_AUTOHSCROLL
+	RTEXT "Nº control (&R):", -1, 8, 26, 56, 8
+	COMBOBOX IDC_CHANNELPROP_CONTROLKEY, 68, 24, 40, 80, CBS_DROPDOWN | CBS_AUTOHSCROLL | WS_TABSTOP
+	RTEXT "Network ID:", -1, 8, 40, 56, 8
+	EDITTEXT IDC_CHANNELPROP_NETWORKID, 68, 40, 128, 8, ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+	RTEXT "TSID:", -1, 8, 52, 56, 8
+	EDITTEXT IDC_CHANNELPROP_TSID, 68, 52, 128, 8, ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+	RTEXT "Service ID:", -1, 8, 64, 56, 8
+	EDITTEXT IDC_CHANNELPROP_SERVICEID, 68, 64, 128, 8, ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+	RTEXT "Espacio sint.:", -1, 8, 76, 56, 8
+	EDITTEXT IDC_CHANNELPROP_TUNINGSPACE, 68, 76, 128, 8, ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+	RTEXT "Canal:", -1, 8, 88, 56, 8
+	EDITTEXT IDC_CHANNELPROP_CHANNELINDEX, 68, 88, 128, 8, ES_AUTOHSCROLL | ES_READONLY | NOT WS_BORDER
+	DEFPUSHBUTTON "Aceptar", IDOK, 80, 104, 56, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 140, 104, 56, 14
+END
+
+IDD_CHANNELSCANSETTINGS DIALOG 32, 32, 256, 118
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Ajustes avanzados de escaneo"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 132, 96, 56, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 192, 96, 56, 14
+	RTEXT "Umbral de nivel de señal (&S):", -1, 8, 10, 120, 8
+	EDITTEXT IDC_CHANNELSCANSETTINGS_SIGNALLEVELTHRESHOLD, 132, 8, 32, 12, ES_AUTOHSCROLL
+	RTEXT "Espera tras cambiar canal (&W):", -1, 8, 26, 120, 8
+	COMBOBOX IDC_CHANNELSCANSETTINGS_SCANWAIT, 132, 24, 36, 128, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	RTEXT "Tiempo máx. de detección (&R):", -1, 8, 42, 120, 8
+	COMBOBOX IDC_CHANNELSCANSETTINGS_RETRYCOUNT, 132, 40, 36, 128, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	LTEXT "(*Aumente si no detecta canales)", -1, 170, 36, 78, 16
+	AUTOCHECKBOX "Detectar servicios de datos (&D)", IDC_CHANNELSCANSETTINGS_DETECTDATASERVICE, 8, 56, 200, 9
+	AUTOCHECKBOX "Detectar servicios 1-Seg (&O)", IDC_CHANNELSCANSETTINGS_DETECT1SEGSERVICE, 8, 68, 200, 9
+	AUTOCHECKBOX "Detectar servicios de audio (&A)", IDC_CHANNELSCANSETTINGS_DETECTAUDIOSERVICE, 8, 80, 200, 9
+	PUSHBUTTON "Ayuda (&H)", IDC_CHANNELSCANSETTINGS_HELP, 8, 96, 56, 14
+END
+
+IDD_OPTIONS_EPG DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "EPG / Info de programa"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	AUTOCHECKBOX "Guardar datos EPG en archivo (&S)", IDC_EPGOPTIONS_SAVEEPGFILE, 16, 20, 200, 9
+	RTEXT "Archivo:", IDC_EPGOPTIONS_EPGFILENAME_LABEL, 24, 34, 36, 8
+	EDITTEXT IDC_EPGOPTIONS_EPGFILENAME, 64, 32, 160, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "...", IDC_EPGOPTIONS_EPGFILENAME_BROWSE, 228, 32, 12, 12
+	AUTOCHECKBOX "Actualizar EPG en modo espera (&B)", IDC_EPGOPTIONS_UPDATEWHENSTANDBY, 16, 48, 200, 9
+	LTEXT "Obtener info extendida al actualizar (&E):", -1, 16, 60, 144, 9
+	AUTOCHECKBOX "BS", IDC_EPGOPTIONS_UPDATEBSEXTENDED, 168, 60, 24, 9
+	AUTOCHECKBOX "CS", IDC_EPGOPTIONS_UPDATECSEXTENDED, 196, 60, 24, 9
+	AUTOCHECKBOX "Usar datos EPG de EpgDataCap_Bon (&D)", IDC_EPGOPTIONS_USEEPGDATA, 16, 72, 200, 9
+	RTEXT "Carpeta datos EPG:", IDC_EPGOPTIONS_EPGDATAFOLDER_LABEL, 24, 86, 72, 8
+	EDITTEXT IDC_EPGOPTIONS_EPGDATAFOLDER, 100, 84, 124, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "...", IDC_EPGOPTIONS_EPGDATAFOLDER_BROWSE, 228, 84, 12, 12
+	GROUPBOX "EPG", IDC_EPGOPTIONS_GROUP, 8, 8, 240, 96, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Guardar datos de logos en archivo (&L)", IDC_LOGOOPTIONS_SAVEDATA, 16, 120, 200, 9
+	RTEXT "Archivo:", IDC_LOGOOPTIONS_DATAFILENAME_LABEL, 24, 134, 36, 8
+	EDITTEXT IDC_LOGOOPTIONS_DATAFILENAME, 64, 132, 160, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "...", IDC_LOGOOPTIONS_DATAFILENAME_BROWSE, 228, 132, 12, 12
+	AUTOCHECKBOX "Guardar logos en formato BMP (&M)", IDC_LOGOOPTIONS_SAVEBMPLOGO, 16, 148, 200, 9
+	AUTOCHECKBOX "Guardar logos en formato RAW (&R)", IDC_LOGOOPTIONS_SAVERAWLOGO, 16, 160, 200, 9
+	RTEXT "Carpeta logos (&F):", -1, 16, 174, 60, 8
+	EDITTEXT IDC_LOGOOPTIONS_LOGOFOLDER, 80, 172, 144, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "...", IDC_LOGOOPTIONS_LOGOFOLDER_BROWSE, 228, 172, 12, 12
+	AUTOCHECKBOX "Forzar actualización (&U)", IDC_LOGOOPTIONS_FORCEUPDATE, 16, 188, 160, 9
+	GROUPBOX "Logos de emisoras", IDC_LOGOOPTIONS_GROUP, 8, 108, 240, 96, WS_CLIPSIBLINGS
+
+	LTEXT "Fuente (&N):", -1, 16, 222, 40, 8
+	LTEXT "", IDC_EVENTINFOOPTIONS_FONT_INFO, 60, 221, 162, 10, SS_SUNKEN
+	PUSHBUTTON "...", IDC_EVENTINFOOPTIONS_FONT_CHOOSE, 228, 220, 12, 12
+	GROUPBOX "Información del programa", IDC_EVENTINFOOPTIONS_GROUP, 8, 208, 240, 32, WS_CLIPSIBLINGS
+END
+
+IDD_OPTIONS_PROGRAMGUIDE DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Guía de programas EPG"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	AUTOCHECKBOX "Mostrar guía dentro de la ventana (&O)", IDC_PROGRAMGUIDEOPTIONS_ONSCREEN, 8, 8, 236, 9
+	AUTOCHECKBOX "Desplazar hasta el canal actual (&S)", IDC_PROGRAMGUIDEOPTIONS_SCROLLTOCURCHANNEL, 8, 20, 236, 9
+	LTEXT "Hora de inicio (&H):", -1, 8, 34, 64, 8
+	COMBOBOX IDC_PROGRAMGUIDEOPTIONS_BEGINHOUR, 76, 32, 36, 120, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	LTEXT "Rango por vista (&R):", -1, 122, 34, 68, 8
+	EDITTEXT IDC_PROGRAMGUIDEOPTIONS_VIEWHOURS, 194, 32, 24, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_PROGRAMGUIDEOPTIONS_VIEWHOURS_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 208, 32, 10, 12
+	LTEXT "h", -1, 220, 34, 16, 8
+	LTEXT "Ancho de canal (&W):", -1, 8, 50, 72, 8
+	EDITTEXT IDC_PROGRAMGUIDEOPTIONS_CHANNELWIDTH, 84, 48, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_PROGRAMGUIDEOPTIONS_CHANNELWIDTH_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 106, 48, 10, 12
+	LTEXT "px (100~500)", -1, 118, 50, 56, 8
+	LTEXT "Líneas por hora (&L):", -1, 8, 66, 72, 8
+	EDITTEXT IDC_PROGRAMGUIDEOPTIONS_LINESPERHOUR, 84, 64, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL
+	CONTROL "", IDC_PROGRAMGUIDEOPTIONS_LINESPERHOUR_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 106, 64, 10, 12
+	LTEXT "lín. (8~60)", -1, 118, 66, 48, 8
+	LTEXT "Fuente (&F):", -1, 8, 82, 40, 8
+	LTEXT "", IDC_PROGRAMGUIDEOPTIONS_FONTINFO, 52, 81, 180, 10, SS_SUNKEN
+	PUSHBUTTON "...", IDC_PROGRAMGUIDEOPTIONS_CHOOSEFONT, 236, 80, 12, 12
+	AUTOCHECKBOX "Usar DirectWrite (&I)", IDC_PROGRAMGUIDEOPTIONS_USEDIRECTWRITE, 8, 98, 112, 9
+	PUSHBUTTON "Ajustes DirectWrite (&T)...", IDC_PROGRAMGUIDEOPTIONS_DIRECTWRITEOPTIONS, 128, 95, 96, 14
+	AUTOCHECKBOX "Usar símbolos ARIB (&B) (req. fuente compatible)", IDC_PROGRAMGUIDEOPTIONS_USEARIBSYMBOL, 8, 112, 236, 9
+	LTEXT "Iconos:", -1, 8, 124, 32, 8
+	AUTOCHECKBOX "HD", IDC_PROGRAMGUIDEOPTIONS_ICON_HD, 40, 124, 28, 9, BS_BITMAP
+	AUTOCHECKBOX "SD", IDC_PROGRAMGUIDEOPTIONS_ICON_SD, 68, 124, 28, 9, BS_BITMAP
+	AUTOCHECKBOX "5.1ch", IDC_PROGRAMGUIDEOPTIONS_ICON_5_1CH, 96, 124, 28, 9, BS_BITMAP
+	AUTOCHECKBOX "Bilingüe", IDC_PROGRAMGUIDEOPTIONS_ICON_MULTILINGUAL, 124, 124, 28, 9, BS_BITMAP
+	AUTOCHECKBOX "Sub", IDC_PROGRAMGUIDEOPTIONS_ICON_SUB, 152, 124, 28, 9, BS_BITMAP
+	AUTOCHECKBOX "Gratis", IDC_PROGRAMGUIDEOPTIONS_ICON_FREE, 180, 124, 28, 9, BS_BITMAP
+	AUTOCHECKBOX "Pago", IDC_PROGRAMGUIDEOPTIONS_ICON_PAY, 208, 124, 28, 9, BS_BITMAP
+	LTEXT "Líneas despl. rueda (&C):", -1, 8, 138, 100, 8
+	EDITTEXT IDC_PROGRAMGUIDEOPTIONS_WHEELSCROLLLINES, 112, 136, 32, 12, WS_CLIPSIBLINGS | ES_AUTOHSCROLL
+	CONTROL "", IDC_PROGRAMGUIDEOPTIONS_WHEELSCROLLLINES_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 134, 136, 10, 12
+	LTEXT "lín. (0 = usar sistema)", -1, 146, 138, 104, 8
+	LTEXT "Doble clic en programa (&D):", -1, 8, 154, 100, 8
+	COMBOBOX IDC_PROGRAMGUIDEOPTIONS_PROGRAMLDOUBLECLICK, 112, 152, 136, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+
+	CONTROL "", IDC_PROGRAMGUIDETOOL_LIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER, 16, 184, 224, 70
+	PUSHBUTTON "Añadir...", IDC_PROGRAMGUIDETOOL_ADD, 16, 258, 38, 14
+	PUSHBUTTON "Editar...", IDC_PROGRAMGUIDETOOL_EDIT, 56, 258, 38, 14, WS_DISABLED
+	PUSHBUTTON "↑(&U)", IDC_PROGRAMGUIDETOOL_UP, 96, 258, 28, 14, WS_DISABLED
+	PUSHBUTTON "↓(&N)", IDC_PROGRAMGUIDETOOL_DOWN, 128, 258, 28, 14, WS_DISABLED
+	PUSHBUTTON "Borrar", IDC_PROGRAMGUIDETOOL_REMOVE, 160, 258, 32, 14, WS_DISABLED
+	PUSHBUTTON "Borrar todo", IDC_PROGRAMGUIDETOOL_REMOVEALL, 196, 258, 44, 14, WS_DISABLED
+	GROUPBOX "Programas externos", IDC_PROGRAMGUIDETOOL_GROUP, 8, 172, 240, 108, WS_CLIPSIBLINGS
+END
+
+IDD_PROGRAMGUIDETOOL DIALOG 0, 0, 240, 84
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Programa externo"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	RTEXT "Nombre (&N):", -1, 8, 10, 40, 8
+	EDITTEXT IDC_PROGRAMGUIDETOOL_NAME, 52, 8, 96, 12, ES_AUTOHSCROLL
+	RTEXT "Comando (&C):", -1, 8, 26, 40, 8
+	EDITTEXT IDC_PROGRAMGUIDETOOL_COMMAND, 52, 24, 164, 12, ES_AUTOHSCROLL | ES_NOHIDESEL
+	PUSHBUTTON "...", IDC_PROGRAMGUIDETOOL_BROWSE, 220, 24, 12, 12
+	PUSHBUTTON "Insertar parámetro (&P)", IDC_PROGRAMGUIDETOOL_PARAMETER, 52, 40, 84, 14
+	PUSHBUTTON "Ayuda (&H)", IDC_PROGRAMGUIDETOOL_HELP, 8, 62, 48, 14
+	DEFPUSHBUTTON "Aceptar", IDOK, 132, 62, 48, 14, WS_DISABLED
+	PUSHBUTTON "Cancelar", IDCANCEL, 184, 62, 48, 14
+END
+
+IDD_OPTIONS_PLUGIN DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Plugins"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	LTEXT "Lista de plugins (&L):", -1, 8, 8, 100, 8
+	CONTROL "", IDC_PLUGIN_LIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_NOSORTHEADER | LVS_SHOWSELALWAYS, 8, 20, 240, 242
+	PUSHBUTTON "Ajustes (&S)...", IDC_PLUGIN_SETTINGS, 8, 266, 56, 14, WS_DISABLED
+	//PUSHBUTTON "アンロード(&U)", IDC_PLUGIN_UNLOAD, 68, 266, 56, 14
+END
+
+IDD_OPTIONS_TSPROCESSOR DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Procesador TS"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	RTEXT "Procesador TS (&T):", -1, 8, 10, 64, 8
+	COMBOBOX IDC_TSPROCESSOR_TSPROCESSORLIST, 76, 8, 104, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	PUSHBUTTON "Propiedades (&P)...", IDC_TSPROCESSOR_PROPERTIES, 184, 7, 64, 14
+	AUTOCHECKBOX "Habilitar procesamiento (&E)", IDC_TSPROCESSOR_ENABLEPROCESSING, 8, 24, 160, 9
+	RTEXT "Módulo por defecto (&M):", IDC_TSPROCESSOR_DEFAULTMODULE_LABEL, 8, 38, 80, 8
+	COMBOBOX IDC_TSPROCESSOR_DEFAULTMODULE, 92, 36, 156, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWN | CBS_AUTOHSCROLL
+	RTEXT "Disp. por defecto (&D):", IDC_TSPROCESSOR_DEFAULTDEVICE_LABEL, 8, 54, 80, 8
+	COMBOBOX IDC_TSPROCESSOR_DEFAULTDEVICE, 92, 52, 156, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWN | CBS_AUTOHSCROLL
+	RTEXT "Filtro por defecto (&F):", IDC_TSPROCESSOR_DEFAULTFILTER_LABEL, 8, 70, 80, 8
+	COMBOBOX IDC_TSPROCESSOR_DEFAULTFILTER, 92, 68, 156, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWN | CBS_AUTOHSCROLL
+	LTEXT "Mapa de sintonizadores (&N):", IDC_TSPROCESSOR_TUNERMAP_LABEL, 8, 88, 120, 8
+	CONTROL "", IDC_TSPROCESSOR_TUNERMAP, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_NOSORTHEADER | LVS_SHOWSELALWAYS, 8, 100, 196, 180
+	PUSHBUTTON "Añadir...", IDC_TSPROCESSOR_TUNERMAP_ADD, 208, 100, 40, 14
+	PUSHBUTTON "Editar...", IDC_TSPROCESSOR_TUNERMAP_EDIT, 208, 118, 40, 14
+	PUSHBUTTON "Borrar (&R)", IDC_TSPROCESSOR_TUNERMAP_REMOVE, 208, 140, 40, 14
+	PUSHBUTTON "Subir (&U)", IDC_TSPROCESSOR_TUNERMAP_UP, 208, 162, 40, 14
+	PUSHBUTTON "Bajar (&W)", IDC_TSPROCESSOR_TUNERMAP_DOWN, 208, 180, 40, 14
+END
+
+IDD_TSPROCESSOR_TUNERMAP DIALOG 0, 0, 240, 170
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Mapa de sintonizador"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 132, 148, 48, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 184, 148, 48, 14
+	RTEXT "Sintonizador (&T):", -1, 8, 10, 56, 8
+	COMBOBOX IDC_TSPROCESSORTUNERMAP_TUNER, 68, 8, 164, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWN | CBS_AUTOHSCROLL
+	RTEXT "Network ID (&N):", -1, 8, 26, 56, 8
+	EDITTEXT IDC_TSPROCESSORTUNERMAP_NETWORKID, 68, 24, 32, 12, ES_AUTOHSCROLL
+	RTEXT "TSID (&S):", -1, 8, 42, 56, 8
+	EDITTEXT IDC_TSPROCESSORTUNERMAP_TSID, 68, 40, 32, 12, ES_AUTOHSCROLL
+	RTEXT "Service ID (&V):", -1, 8, 58, 56, 8
+	EDITTEXT IDC_TSPROCESSORTUNERMAP_SERVICEID, 68, 56, 32, 12, ES_AUTOHSCROLL
+	AUTORADIOBUTTON "Habilitar procesamiento (&E)", IDC_TSPROCESSORTUNERMAP_ENABLEPROCESSING, 8, 72, 160, 9, WS_GROUP
+	AUTORADIOBUTTON "Desactivar procesamiento (&I)", IDC_TSPROCESSORTUNERMAP_DISABLEPROCESSING, 8, 132, 160, 9
+	RTEXT "Módulo (&M):", IDC_TSPROCESSORTUNERMAP_MODULE_LABEL, 8, 86, 56, 8
+	COMBOBOX IDC_TSPROCESSORTUNERMAP_MODULE, 68, 84, 164, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWN | CBS_AUTOHSCROLL
+	RTEXT "Dispositivo (&D):", IDC_TSPROCESSORTUNERMAP_DEVICE_LABEL, 8, 102, 56, 8
+	COMBOBOX IDC_TSPROCESSORTUNERMAP_DEVICE, 68, 100, 164, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWN | CBS_AUTOHSCROLL
+	RTEXT "Filtro (&F):", IDC_TSPROCESSORTUNERMAP_FILTER_LABEL, 8, 118, 56, 8
+	COMBOBOX IDC_TSPROCESSORTUNERMAP_FILTER, 68, 116, 164, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWN | CBS_AUTOHSCROLL
+	PUSHBUTTON "Ayuda (H)", IDC_TSPROCESSORTUNERMAP_HELP, 8, 148, 48, 14
+END
+
+IDD_PROPERTYPAGEFRAME DIALOG 0, 0, 168, 98
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Propiedades"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 60, 76, 48, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 112, 76, 48, 14
+	CONTROL "", IDC_PROPERTYPAGEFRAME_TAB, WC_TABCONTROL, WS_CHILD | WS_VISIBLE, 4, 4, 160, 64
+END
+
+IDD_OPTIONS_LOG DIALOG 0, 0, 256, 288
+STYLE DS_CONTROL | WS_CHILD
+CAPTION "Registro"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	CONTROL "", IDC_LOG_LIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_NOSORTHEADER, 8, 8, 240, 242
+	PUSHBUTTON "Copiar (&C)", IDC_LOG_COPY, 8, 254, 56, 14
+	PUSHBUTTON "Guardar (&S)", IDC_LOG_SAVE, 68, 254, 56, 14
+	PUSHBUTTON "Limpiar (&L)", IDC_LOG_CLEAR, 192, 254, 56, 14
+	AUTOCHECKBOX "Guardar registro continuamente en archivo (&F)", IDC_LOG_OUTPUTTOFILE, 8, 272, 200, 9
+END
+
+IDD_RECORDOPTION DIALOG 0, 0, 224, 294
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Opciones de grabación"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	LTEXT "Nombre de archivo (&F):", IDC_RECORD_FILENAME_LABEL, 8, 8, 96, 8
+	EDITTEXT IDC_RECORD_FILENAME, 16, 20, 184, 12, ES_AUTOHSCROLL | ES_NOHIDESEL
+	PUSHBUTTON "...", IDC_RECORD_FILENAME_BROWSE, 204, 20, 12, 12
+	PUSHBUTTON "▼", IDC_RECORD_FILENAMEFORMAT, 204, 36, 12, 12
+	LTEXT "Vista previa:", IDC_RECORD_FILENAMEPREVIEW_LABEL, 16, 36, 44, 8
+	EDITTEXT IDC_RECORD_FILENAMEPREVIEW, 60, 36, 140, 8, ES_READONLY | ES_AUTOHSCROLL | NOT WS_BORDER
+
+	AUTORADIOBUTTON "Ahora (&N)", IDC_RECORD_START_NOW, 16, 64, 80, 9, WS_GROUP
+	AUTORADIOBUTTON "Especificar hora (&T)", IDC_RECORD_START_DATETIME, 16, 76, 100, 9
+	AUTORADIOBUTTON "Tiempo para iniciar (&D)", IDC_RECORD_START_DELAY, 16, 104, 120, 9
+	CONTROL "", IDC_RECORD_STARTTIME_TIME, DATETIMEPICK_CLASS, WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_GROUP, 24, 88, 92, 12
+	EDITTEXT IDC_RECORD_STARTTIME_HOUR, 24, 116, 24, 12, WS_CLIPSIBLINGS | ES_NUMBER
+	CONTROL "", IDC_RECORD_STARTTIME_HOUR_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 38, 116, 10, 12
+	LTEXT "h", IDC_RECORD_STARTTIME_HOUR_LABEL, 52, 118, 16, 8
+	EDITTEXT IDC_RECORD_STARTTIME_MINUTE, 72, 116, 24, 12, WS_CLIPSIBLINGS | ES_NUMBER
+	CONTROL "", IDC_RECORD_STARTTIME_MINUTE_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 86, 116, 10, 12
+	LTEXT "m", IDC_RECORD_STARTTIME_MINUTE_LABEL, 100, 118, 8, 8
+	EDITTEXT IDC_RECORD_STARTTIME_SECOND, 112, 116, 24, 12, WS_CLIPSIBLINGS | ES_NUMBER
+	CONTROL "", IDC_RECORD_STARTTIME_SECOND_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 126, 116, 10, 12
+	LTEXT "seg", IDC_RECORD_STARTTIME_SECOND_LABEL, 140, 118, 24, 8
+	GROUPBOX "Hora de inicio", IDC_RECORD_STARTTIME, 8, 52, 208, 84, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Detener grabación a la hora (&S)", IDC_RECORD_STOPSPECTIME, 16, 140, 130, 9
+	AUTORADIOBUTTON "Especificar hora (&I)", IDC_RECORD_STOPDATETIME, 16, 152, 100, 9, WS_GROUP
+	AUTORADIOBUTTON "Duración hasta detener (&R) (*desde inicio)", IDC_RECORD_STOPREMAINTIME, 16, 180, 192, 9
+	CONTROL "", IDC_RECORD_STOPTIME_TIME, DATETIMEPICK_CLASS, WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_GROUP, 24, 164, 92, 12
+	EDITTEXT IDC_RECORD_STOPTIME_HOUR, 24, 192, 24, 12, WS_CLIPSIBLINGS | ES_NUMBER
+	CONTROL "", IDC_RECORD_STOPTIME_HOUR_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 38, 192, 10, 12
+	LTEXT "h", IDC_RECORD_STOPTIME_HOUR_LABEL, 52, 194, 16, 8
+	EDITTEXT IDC_RECORD_STOPTIME_MINUTE, 72, 192, 24, 12, WS_CLIPSIBLINGS | ES_NUMBER
+	CONTROL "", IDC_RECORD_STOPTIME_MINUTE_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 86, 192, 10, 12
+	LTEXT "m", IDC_RECORD_STOPTIME_MINUTE_LABEL, 100, 194, 8, 8
+	EDITTEXT IDC_RECORD_STOPTIME_SECOND, 112, 192, 24, 12, WS_CLIPSIBLINGS | ES_NUMBER
+	CONTROL "", IDC_RECORD_STOPTIME_SECOND_UD, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 126, 192, 10, 12
+	LTEXT "seg", IDC_RECORD_STOPTIME_SECOND_LABEL, 140, 194, 24, 8
+	GROUPBOX "", -1, 8, 140, 208, 72, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Grabar solo el servicio actual (&C)", IDC_RECORD_CURSERVICEONLY, 8, 216, 180, 9
+	AUTOCHECKBOX "Guardar subtítulos (&P)", IDC_RECORD_SAVESUBTITLE, 8, 228, 180, 9
+	AUTOCHECKBOX "Guardar carrusel de datos (&A)", IDC_RECORD_SAVEDATACARROUSEL, 8, 240, 180, 9
+
+	LTEXT "Plugin guardado (&L):", IDC_RECORD_WRITEPLUGIN_LABEL, 8, 254, 64, 8
+	COMBOBOX IDC_RECORD_WRITEPLUGIN, 76, 252, 104, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	PUSHBUTTON "Config...", IDC_RECORD_WRITEPLUGINSETTING, 184, 252, 32, 14, WS_DISABLED
+
+	DEFPUSHBUTTON "Aceptar", IDOK, 64, 272, 48, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 116, 272, 48, 14
+	PUSHBUTTON "Anular prog.", IDC_RECORD_CANCEL, 168, 272, 48, 14, WS_DISABLED
+END
+
+IDD_EVENTSEARCH DIALOG 0, 0, 300, 176
+STYLE DS_CONTROL | WS_CHILD | WS_VISIBLE
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	RTEXT "Buscar:", -1, 8, 10, 36, 8
+	COMBOBOX IDC_EVENTSEARCH_KEYWORD, 48, 7, 228, 128, WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | CBS_DROPDOWN | CBS_AUTOHSCROLL
+	PUSHBUTTON "▼", IDC_EVENTSEARCH_KEYWORDMENU, 278, 7, 14, 14, WS_CLIPSIBLINGS
+	AUTOCHECKBOX "Mayús/minús", IDC_EVENTSEARCH_CASESENSITIVE, 48, 26, 60, 9, WS_CLIPSIBLINGS
+	AUTOCHECKBOX "RegExp", IDC_EVENTSEARCH_REGEXP, 112, 26, 44, 9, WS_CLIPSIBLINGS
+	RTEXT "En:", -1, 160, 26, 32, 8
+	COMBOBOX IDC_EVENTSEARCH_KEYWORDTARGET, 196, 23, 96, 64, WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | CBS_DROPDOWNLIST
+
+	RTEXT "Género:", -1, 8, 40, 36, 8
+	CONTROL "", IDC_EVENTSEARCH_GENRE, WC_TREEVIEW, WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_BORDER | WS_TABSTOP | WS_CLIPSIBLINGS | TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT, 48, 40, 120, 136
+	CTEXT "", IDC_EVENTSEARCH_GENRE_STATUS, 8, 60, 36, 8, WS_CLIPSIBLINGS
+	PUSHBUTTON "Todo", IDC_EVENTSEARCH_GENRE_CHECKALL, 8, 146, 36, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Nada", IDC_EVENTSEARCH_GENRE_UNCHECKALL, 8, 162, 36, 14, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Días:", IDC_EVENTSEARCH_DAYOFWEEK, 172, 42, 32, 9, BS_RIGHT | WS_CLIPSIBLINGS
+	AUTOCHECKBOX "D", IDC_EVENTSEARCH_DAYOFWEEK_SUNDAY, 208, 40, 12, 12, BS_PUSHLIKE | WS_CLIPSIBLINGS
+	AUTOCHECKBOX "L", IDC_EVENTSEARCH_DAYOFWEEK_MONDAY, 220, 40, 12, 12, BS_PUSHLIKE | WS_CLIPSIBLINGS
+	AUTOCHECKBOX "M", IDC_EVENTSEARCH_DAYOFWEEK_TUESDAY, 232, 40, 12, 12, BS_PUSHLIKE | WS_CLIPSIBLINGS
+	AUTOCHECKBOX "X", IDC_EVENTSEARCH_DAYOFWEEK_WEDNESDAY, 244, 40, 12, 12, BS_PUSHLIKE | WS_CLIPSIBLINGS
+	AUTOCHECKBOX "J", IDC_EVENTSEARCH_DAYOFWEEK_THURSDAY, 256, 40, 12, 12, BS_PUSHLIKE | WS_CLIPSIBLINGS
+	AUTOCHECKBOX "V", IDC_EVENTSEARCH_DAYOFWEEK_FRIDAY, 268, 40, 12, 12, BS_PUSHLIKE | WS_CLIPSIBLINGS
+	AUTOCHECKBOX "S", IDC_EVENTSEARCH_DAYOFWEEK_SATURDAY, 280, 40, 12, 12, BS_PUSHLIKE | WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Hora:", IDC_EVENTSEARCH_TIME, 172, 58, 32, 9, BS_RIGHT | WS_CLIPSIBLINGS
+	EDITTEXT IDC_EVENTSEARCH_TIME_START_HOUR, 208, 56, 16, 12, ES_NUMBER | ES_AUTOHSCROLL | WS_CLIPSIBLINGS
+	CTEXT ":", IDC_EVENTSEARCH_TIME_START_SEPARATOR, 224, 58, 4, 8, WS_CLIPSIBLINGS
+	EDITTEXT IDC_EVENTSEARCH_TIME_START_MINUTE, 228, 56, 16, 12, ES_NUMBER | ES_AUTOHSCROLL | WS_CLIPSIBLINGS
+	CTEXT "~", IDC_EVENTSEARCH_TIME_RANGE, 244, 58, 12, 8, WS_CLIPSIBLINGS
+	EDITTEXT IDC_EVENTSEARCH_TIME_END_HOUR, 256, 56, 16, 12, ES_NUMBER | ES_AUTOHSCROLL | WS_CLIPSIBLINGS
+	CTEXT ":", IDC_EVENTSEARCH_TIME_END_SEPARATOR, 272, 58, 4, 8, WS_CLIPSIBLINGS
+	EDITTEXT IDC_EVENTSEARCH_TIME_END_MINUTE, 276, 56, 16, 12, ES_NUMBER | ES_AUTOHSCROLL | WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Durac.:", IDC_EVENTSEARCH_DURATION, 170, 74, 34, 9, BS_RIGHT | WS_CLIPSIBLINGS
+	EDITTEXT IDC_EVENTSEARCH_DURATION_SHORT_INPUT, 208, 72, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL | WS_CLIPSIBLINGS
+	CONTROL "", IDC_EVENTSEARCH_DURATION_SHORT_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 130, 72, 10, 12
+	LTEXT "min o más", IDC_EVENTSEARCH_DURATION_SHORT_UNIT, 242, 74, 44, 8, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Video:", IDC_EVENTSEARCH_VIDEO, 172, 90, 32, 9, BS_RIGHT | WS_CLIPSIBLINGS
+	COMBOBOX IDC_EVENTSEARCH_VIDEO_LIST, 208, 88, 40, 64, WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | CBS_DROPDOWNLIST
+
+	AUTOCHECKBOX "Acceso:", IDC_EVENTSEARCH_CA, 172, 106, 48, 9, BS_RIGHT | WS_CLIPSIBLINGS
+	COMBOBOX IDC_EVENTSEARCH_CA_LIST, 224, 104, 48, 64, WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | CBS_DROPDOWNLIST
+
+	AUTOCHECKBOX "Resaltar resultados (&H)", IDC_EVENTSEARCH_HIGHLIGHT, 176, 124, 112, 9, WS_CLIPSIBLINGS
+
+	COMBOBOX IDC_EVENTSEARCH_SETTINGSLIST, 176, 140, 46, 160, WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | CBS_DROPDOWN | CBS_AUTOHSCROLL | CBS_SORT
+	PUSHBUTTON "Guardar", IDC_EVENTSEARCH_SETTINGSLIST_SAVE, 224, 139, 36, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Borrar", IDC_EVENTSEARCH_SETTINGSLIST_DELETE, 262, 139, 30, 14, WS_CLIPSIBLINGS
+
+	COMBOBOX IDC_EVENTSEARCH_SEARCHTARGET, 176, 161, 64, 80, WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | CBS_DROPDOWNLIST
+	PUSHBUTTON "Buscar (&S)", IDC_EVENTSEARCH_SEARCH, 244, 160, 48, 16, WS_CLIPSIBLINGS
+END
+
+IDD_PROGRAMSEARCH DIALOG 0, 0, 300, 332
+CAPTION "Buscar programas"
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	LTEXT "", IDC_PROGRAMSEARCH_SETTINGSPLACE, 0, 0, 300, 176, NOT WS_VISIBLE | WS_CLIPSIBLINGS
+	RTEXT "", IDC_PROGRAMSEARCH_STATUS, 8, 180, 284, 8
+	LTEXT "", IDC_PROGRAMSEARCH_RESULTPANE, 8, 192, 284, 132, NOT WS_VISIBLE
+	CONTROL "", IDC_PROGRAMSEARCH_RESULT, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS, 8, 192, 284, 64
+	CONTROL "", IDC_PROGRAMSEARCH_INFO, "RICHEDIT50W", WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_VSCROLL | WS_CLIPSIBLINGS | ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | ES_NOHIDESEL, 8, 260, 284, 64, WS_EX_STATICEDGE
+END
+
+IDD_EPGCHANNELSETTINGS DIALOG 0, 0, 232, 262
+CAPTION "Configurar canales visibles"
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_DLGMODALFRAME
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 124, 240, 48, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Cancelar", IDCANCEL, 176, 240, 48, 14, WS_CLIPSIBLINGS
+	CONTROL "", IDC_EPGCHANNELSETTINGS_CHANNELLIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | LVS_REPORT | LVS_SINGLESEL | LVS_NOCOLUMNHEADER, 8, 8, 128, 184
+	PUSHBUTTON "Marcar todo (&A)", IDC_EPGCHANNELSETTINGS_CHECKALL, 144, 8, 80, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Desmarcar todo (&U)", IDC_EPGCHANNELSETTINGS_UNCHECKALL, 144, 26, 80, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Invertir selec. (&I)", IDC_EPGCHANNELSETTINGS_INVERTCHECK, 144, 44, 80, 14, WS_CLIPSIBLINGS
+	AUTOCHECKBOX "Mostrar solo canales con información EPG (&E)", IDC_EPGCHANNELSETTINGS_EXCLUDENOEVENT, 8, 200, 216, 9, WS_CLIPSIBLINGS
+	AUTOCHECKBOX "Ocultar subcanales con igual programación (&C)", IDC_EPGCHANNELSETTINGS_EXCLUDECOMMONEVENTONLY, 8, 212, 216, 9, WS_CLIPSIBLINGS
+	AUTOCHECKBOX "Combinar programas iguales en canal y subcanal (&M)", IDC_EPGCHANNELSETTINGS_COMBINECOMMONEVENTS, 8, 224, 216, 9, WS_CLIPSIBLINGS
+END
+
+IDD_ERROR DIALOG 0, 0, 256, 56
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Error"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 192, 32, 56, 16
+	CONTROL "", IDC_ERROR_ICON, WC_STATIC, SS_ICON | WS_CHILD | WS_VISIBLE, 8, 8, 16, 16
+	CONTROL "", IDC_ERROR_MESSAGE, "RICHEDIT50W", ES_MULTILINE | ES_READONLY | ES_AUTOHSCROLL | WS_CHILD | WS_VISIBLE | WS_TABSTOP, 32, 8, 216, 16
+END
+
+IDD_STREAMPROPERTIES DIALOG 0, 0, 200, 158
+CAPTION "Información del stream"
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_DLGMODALFRAME
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	CONTROL "", IDC_STREAMPROPERTIES_TAB, WC_TABCONTROL, WS_CHILD | WS_VISIBLE | WS_TABSTOP | WS_CLIPSIBLINGS | TCS_FIXEDWIDTH, 0, 0, 200, 158
+END
+
+IDD_STREAMINFO DIALOG 0, 0, 192, 138
+STYLE DS_CONTROL | WS_CHILD
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	LTEXT "Stream:", -1, 8, 8, 40, 8
+	EDITTEXT IDC_STREAMINFO_STREAM, 52, 8, 132, 8, ES_READONLY | ES_AUTOHSCROLL | NOT WS_BORDER
+	LTEXT "Red:", -1, 8, 20, 40, 8
+	EDITTEXT IDC_STREAMINFO_NETWORK, 52, 20, 132, 8, ES_READONLY | ES_AUTOHSCROLL | NOT WS_BORDER
+	CONTROL "", IDC_STREAMINFO_SERVICE, WC_TREEVIEW, WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_BORDER | WS_TABSTOP | WS_CLIPSIBLINGS | TVS_HASBUTTONS | TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS, 8, 32, 176, 80
+	PUSHBUTTON "Copiar", IDC_STREAMINFO_COPY, 84, 116, 48, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Actualizar", IDC_STREAMINFO_UPDATE, 136, 116, 48, 14, WS_CLIPSIBLINGS
+END
+
+IDD_PIDINFO DIALOG 0, 0, 192, 138
+STYLE DS_CONTROL | WS_CHILD
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	CONTROL "", IDC_PIDINFO_LIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_BORDER | WS_TABSTOP | WS_CLIPSIBLINGS | LVS_REPORT | LVS_SHOWSELALWAYS, 8, 8, 176, 104
+	PUSHBUTTON "Copiar", IDC_PIDINFO_COPY, 136, 116, 48, 14, WS_CLIPSIBLINGS
+END
+
+IDD_TSPROCESSORERROR DIALOG 0, 0, 240, 192
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Error del procesador TS"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 176, 168, 56, 16
+	CONTROL "", IDC_TSPROCESSORERROR_ICON, WC_STATIC, SS_ICON | WS_CHILD | WS_VISIBLE, 8, 8, 16, 16
+	EDITTEXT IDC_TSPROCESSORERROR_MESSAGE, 32, 8, 200, 48, ES_MULTILINE | ES_READONLY | ES_AUTOVSCROLL | WS_VSCROLL | NOT WS_BORDER
+	AUTORADIOBUTTON "Reintentar con el filtro seleccionado (&R)", IDC_TSPROCESSORERROR_RETRY, 8, 64, 180, 9, WS_GROUP
+	AUTORADIOBUTTON "No usar filtro (&N)", IDC_TSPROCESSORERROR_NOFILTER, 8, 152, 140, 9
+	COMBOBOX IDC_TSPROCESSORERROR_DEVICELIST, 16, 76, 216, 80, CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
+	LISTBOX IDC_TSPROCESSORERROR_FILTERLIST, 16, 92, 216, 40, LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP | WS_GROUP
+	PUSHBUTTON "Buscar filtros de nuevo (&S)", IDC_TSPROCESSORERROR_SEARCH, 136, 136, 96, 14
+END
+
+IDD_ZOOMOPTIONS DIALOG 0, 0, 208, 178
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Opciones de zoom"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 100, 160, 48, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 152, 160, 48, 14
+	CONTROL "", IDC_ZOOMOPTIONS_LIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER, 8, 8, 104, 144
+	AUTORADIOBUTTON "Porcentaje (&R)", IDC_ZOOMOPTIONS_TYPE_RATE, 120, 8, 80, 9, WS_GROUP
+	AUTORADIOBUTTON "Tamaño fijo (&S)", IDC_ZOOMOPTIONS_TYPE_SIZE, 120, 36, 80, 9
+	LTEXT "Zoom (&Z):", IDC_ZOOMOPTIONS_RATE_LABEL, 124, 22, 34, 8, WS_GROUP
+	EDITTEXT IDC_ZOOMOPTIONS_RATE, 160, 20, 32, 12, ES_NUMBER | ES_AUTOHSCROLL | WS_DISABLED
+	LTEXT "%", IDC_ZOOMOPTIONS_RATE_UNIT, 194, 22, 8, 8
+	LTEXT "Ancho (&W):", IDC_ZOOMOPTIONS_WIDTH_LABEL, 120, 50, 38, 8
+	EDITTEXT IDC_ZOOMOPTIONS_WIDTH, 160, 48, 32, 12, ES_NUMBER | ES_AUTOHSCROLL | WS_DISABLED
+	LTEXT "Alto (&H):", IDC_ZOOMOPTIONS_HEIGHT_LABEL, 120, 66, 38, 8
+	EDITTEXT IDC_ZOOMOPTIONS_HEIGHT, 160, 64, 32, 12, ES_NUMBER | ES_AUTOHSCROLL | WS_DISABLED
+	PUSHBUTTON "Tamaño actual (&C)", IDC_ZOOMOPTIONS_GETCURSIZE, 120, 80, 80, 14, WS_DISABLED
+	PUSHBUTTON "Subir (&U)", IDC_ZOOMOPTIONS_UP, 120, 102, 48, 14
+	PUSHBUTTON "Bajar (&D)", IDC_ZOOMOPTIONS_DOWN, 120, 120, 48, 14
+END
+
+IDD_PANANDSCANOPTIONS DIALOG 0, 0, 236, 246
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Ajustes de Pan & Scan"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 112, 224, 56, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 172, 224, 56, 14
+	CONTROL "", IDC_PANANDSCAN_LIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOSORTHEADER, 8, 8, 160, 120
+	PUSHBUTTON "Subir (&U)", IDC_PANANDSCAN_UP, 172, 8, 56, 14
+	PUSHBUTTON "Bajar (&D)", IDC_PANANDSCAN_DOWN, 172, 26, 56, 14
+	PUSHBUTTON "Borrar (&E)", IDC_PANANDSCAN_REMOVE, 172, 48, 56, 14
+	PUSHBUTTON "Borrar todo (&C)", IDC_PANANDSCAN_CLEAR, 172, 66, 56, 14
+	PUSHBUTTON "Importar (&I)...", IDC_PANANDSCAN_IMPORT, 172, 96, 56, 14
+	PUSHBUTTON "Exportar (&X)...", IDC_PANANDSCAN_EXPORT, 172, 114, 56, 14
+
+	PUSHBUTTON "Añadir (&A)", IDC_PANANDSCAN_ADD, 12, 130, 56, 14, WS_DISABLED
+	PUSHBUTTON "Actualizar (&L)", IDC_PANANDSCAN_REPLACE, 72, 130, 56, 14, WS_DISABLED
+
+	LTEXT "Nombre (&N):", -1, 12, 150, 42, 8
+	EDITTEXT IDC_PANANDSCAN_NAME, 56, 148, 84, 12, ES_AUTOHSCROLL
+	LTEXT "Posic. (&P):", -1, 12, 166, 42, 8
+	LTEXT "X", -1, 56, 166, 8, 8
+	EDITTEXT IDC_PANANDSCAN_XPOS, 64, 164, 32, 12, ES_AUTOHSCROLL
+	LTEXT "Y", -1, 100, 166, 8, 8
+	EDITTEXT IDC_PANANDSCAN_YPOS, 108, 164, 32, 12, ES_AUTOHSCROLL
+	LTEXT "%", -1, 144, 166, 8, 8
+	LTEXT "Tamaño (&S):", -1, 12, 182, 42, 8
+	LTEXT "X", -1, 56, 182, 8, 8
+	EDITTEXT IDC_PANANDSCAN_WIDTH, 64, 180, 32, 12, ES_AUTOHSCROLL
+	LTEXT "Y", -1, 100, 182, 8, 8
+	EDITTEXT IDC_PANANDSCAN_HEIGHT, 108, 180, 32, 12, ES_AUTOHSCROLL
+	LTEXT "%", -1, 144, 182, 8, 8
+	LTEXT "Aspecto (&R):", -1, 12, 198, 42, 8
+	LTEXT "X", -1, 56, 198, 8, 8
+	EDITTEXT IDC_PANANDSCAN_XASPECT, 64, 196, 32, 12, ES_AUTOHSCROLL | ES_NUMBER
+	LTEXT "Y", -1, 100, 198, 8, 8
+	EDITTEXT IDC_PANANDSCAN_YASPECT, 108, 196, 32, 12, ES_AUTOHSCROLL | ES_NUMBER
+	LTEXT "", IDC_PANANDSCAN_PREVIEW, 152, 148, 68, 60, SS_OWNERDRAW
+	GROUPBOX "", -1, 8, 136, 220, 80, WS_CLIPSIBLINGS
+
+	PUSHBUTTON "Probar (&T)", IDC_PANANDSCAN_TEST, 8, 224, 56, 14, WS_DISABLED
+END
+
+IDD_ORGANIZEFAVORITES DIALOG 0, 0, 192, 182
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+CAPTION "Organizar favoritos"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 84, 162, 48, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Cancelar", IDCANCEL, 136, 162, 48, 14, WS_CLIPSIBLINGS
+	CONTROL "", IDC_FAVORITES_FOLDERTREE, WC_TREEVIEW, WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | WS_BORDER | WS_TABSTOP | WS_CLIPSIBLINGS | TVS_HASBUTTONS | TVS_HASLINES | TVS_SHOWSELALWAYS | TVS_EDITLABELS, 4, 4, 184, 152
+	PUSHBUTTON "Nueva carpeta", IDC_FAVORITES_NEWFOLDER, 4, 162, 56, 14, WS_CLIPSIBLINGS
+END
+
+IDD_FAVORITEPROPERTIES DIALOG 0, 0, 212, 114
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Propiedades de favorito"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 104, 92, 48, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 156, 92, 48, 14
+	RTEXT "Nombre (&N):", -1, 8, 10, 52, 8
+	EDITTEXT IDC_FAVORITEPROP_NAME, 64, 8, 140, 12, ES_AUTOHSCROLL
+	RTEXT "BonDriver (&B):", -1, 8, 26, 52, 8
+	COMBOBOX IDC_FAVORITEPROP_BONDRIVER, 64, 24, 140, 12, CBS_DROPDOWN | WS_VSCROLL | WS_TABSTOP
+	AUTOCHECKBOX "Usar siempre el BonDriver especificado (&F)", IDC_FAVORITEPROP_FORCEBONDRIVERCHANGE, 64, 40, 144, 9
+	RTEXT "Service ID:", -1, 8, 52, 52, 8
+	EDITTEXT IDC_FAVORITEPROP_SERVICEID, 64, 52, 140, 8, ES_READONLY | ES_AUTOHSCROLL | NOT WS_BORDER
+	RTEXT "Network ID:", -1, 8, 64, 52, 8
+	EDITTEXT IDC_FAVORITEPROP_NETWORKID, 64, 64, 140, 8, ES_READONLY | ES_AUTOHSCROLL | NOT WS_BORDER
+	RTEXT "TSID:", -1, 8, 76, 52, 8
+	EDITTEXT IDC_FAVORITEPROP_TRANSPORTSTREAMID, 64, 76, 140, 8, ES_READONLY | ES_AUTOHSCROLL | NOT WS_BORDER
+END
+
+IDD_PROGRAMGUIDEFAVORITES DIALOG 0, 0, 272, 158
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Botones de favoritos de guía"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 164, 136, 48, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 216, 136, 48, 14
+	CONTROL "", IDC_PROGRAMGUIDEFAVORITES_LIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER, 8, 8, 120, 120
+	LTEXT "Nombre (&N):", IDC_PROGRAMGUIDEFAVORITES_NAME_LABEL, 136, 10, 34, 8
+	EDITTEXT IDC_PROGRAMGUIDEFAVORITES_NAME, 172, 8, 92, 12, ES_AUTOHSCROLL
+	LTEXT "Colores (&C):", IDC_PROGRAMGUIDEFAVORITES_COLORS_LABEL, 136, 26, 34, 8
+	LTEXT "", IDC_PROGRAMGUIDEFAVORITES_COLORS_PREVIEW, 172, 24, 92, 14, SS_OWNERDRAW | SS_SUNKEN
+	PUSHBUTTON "Fondo (&B)...", IDC_PROGRAMGUIDEFAVORITES_BACKCOLOR, 172, 40, 44, 14
+	PUSHBUTTON "Texto (&T)...", IDC_PROGRAMGUIDEFAVORITES_TEXTCOLOR, 220, 40, 44, 14
+	PUSHBUTTON "Subir (&U)", IDC_PROGRAMGUIDEFAVORITES_UP, 136, 74, 48, 14
+	PUSHBUTTON "Bajar (&D)", IDC_PROGRAMGUIDEFAVORITES_DOWN, 136, 92, 48, 14
+	PUSHBUTTON "Borrar (&L)", IDC_PROGRAMGUIDEFAVORITES_DELETE, 136, 114, 48, 14
+	AUTOCHECKBOX "Igualar ancho de botones (&F)", IDC_PROGRAMGUIDEFAVORITES_FIXEDWIDTH, 8, 136, 136, 9
+END
+
+IDD_PROGRAMGUIDETOOLBAR DIALOG 0, 0, 196, 222
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Configurar barra de herramientas EPG"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 88, 200, 48, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 140, 200, 48, 14
+
+	CONTROL "", IDC_PROGRAMGUIDETOOLBAR_ITEMLIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | LVS_REPORT | LVS_SINGLESEL | LVS_SHOWSELALWAYS | LVS_NOCOLUMNHEADER, 16, 20, 112, 60
+	PUSHBUTTON "Subir (&U)", IDC_PROGRAMGUIDETOOLBAR_ITEMLIST_UP, 132, 20, 48, 14
+	PUSHBUTTON "Bajar (&D)", IDC_PROGRAMGUIDETOOLBAR_ITEMLIST_DOWN, 132, 38, 48, 14
+	GROUPBOX "Barras (&I)", -1, 8, 8, 180, 80, WS_CLIPSIBLINGS
+
+	LTEXT "Nº de botones (&B):", -1, 16, 106, 60, 8
+	COMBOBOX IDC_PROGRAMGUIDETOOLBAR_DATEBAR_BUTTONCOUNT, 80, 104, 24, 128, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	GROUPBOX "Barra de fechas", -1, 8, 92, 180, 32, WS_CLIPSIBLINGS
+
+	AUTORADIOBUTTON "Por intervalo (&N)", IDC_PROGRAMGUIDETOOLBAR_TIMEBAR_TIME_INTERVAL, 16, 142, 62, 9, WS_GROUP
+	AUTORADIOBUTTON "Horas fijas (&T)", IDC_PROGRAMGUIDETOOLBAR_TIMEBAR_TIME_CUSTOM, 16, 158, 62, 9
+	COMBOBOX IDC_PROGRAMGUIDETOOLBAR_TIMEBAR_INTERVAL, 80, 140, 24, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	LTEXT "horas", IDC_PROGRAMGUIDETOOLBAR_TIMEBAR_INTERVAL_UNIT, 108, 142, 32, 8
+	EDITTEXT IDC_PROGRAMGUIDETOOLBAR_TIMEBAR_CUSTOMTIME, 80, 156, 100, 12, ES_AUTOHSCROLL
+	LTEXT "Máx. botones (&M):", -1, 16, 174, 60, 8
+	COMBOBOX IDC_PROGRAMGUIDETOOLBAR_TIMEBAR_MAXBUTTONCOUNT, 80, 172, 24, 128, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	GROUPBOX "Barra de horas", -1, 8, 128, 180, 64, WS_CLIPSIBLINGS
+END
+
+IDD_FEATUREDEVENTS DIALOG 0, 0, 320, 292
+STYLE WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_DLGMODALFRAME
+CAPTION "Programas destacados"
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 212, 268, 48, 16, WS_CLIPSIBLINGS
+	PUSHBUTTON "Cancelar", IDCANCEL, 264, 268, 48, 16, WS_CLIPSIBLINGS
+	LTEXT "Canales de búsqueda por defecto:", -1, 8, 8, 108, 8, WS_CLIPSIBLINGS
+	CONTROL "", IDC_FEATUREDEVENTS_SERVICELIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | LVS_REPORT | LVS_SINGLESEL | LVS_NOCOLUMNHEADER | LVS_ALIGNTOP, 8, 20, 104, 240
+	PUSHBUTTON "Todo (&A)", IDC_FEATUREDEVENTS_SERVICELIST_CHECKALL, 12, 264, 48, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Nada (&U)", IDC_FEATUREDEVENTS_SERVICELIST_UNCHECKALL, 64, 264, 48, 14, WS_CLIPSIBLINGS
+	LTEXT "Condiciones de búsqueda:", -1, 120, 8, 100, 8, WS_CLIPSIBLINGS
+	CONTROL "", IDC_FEATUREDEVENTS_SEARCHSETTINGSLIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | LVS_REPORT | LVS_NOSORTHEADER | LVS_SINGLESEL | LVS_SHOWSELALWAYS, 120, 20, 192, 160
+	PUSHBUTTON "Editar (&E)...", IDC_FEATUREDEVENTS_SEARCHSETTINGSLIST_EDIT, 120, 184, 48, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Borrar (&L)", IDC_FEATUREDEVENTS_SEARCHSETTINGSLIST_DELETE, 120, 202, 48, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Añadir (&D)...", IDC_FEATUREDEVENTS_SEARCHSETTINGSLIST_ADD, 176, 184, 48, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Duplicar (&C)", IDC_FEATUREDEVENTS_SEARCHSETTINGSLIST_DUPLICATE, 176, 202, 48, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Subir (&P)", IDC_FEATUREDEVENTS_SEARCHSETTINGSLIST_UP, 232, 184, 48, 14, WS_CLIPSIBLINGS
+	PUSHBUTTON "Bajar (&W)", IDC_FEATUREDEVENTS_SEARCHSETTINGSLIST_DOWN, 232, 202, 48, 14, WS_CLIPSIBLINGS
+	RTEXT "Periodo (&R):", IDC_FEATUREDEVENTS_PERIOD_LABEL, 120, 234, 64, 8, WS_CLIPSIBLINGS
+	EDITTEXT IDC_FEATUREDEVENTS_PERIOD, 188, 232, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL | WS_CLIPSIBLINGS
+	CONTROL "", IDC_FEATUREDEVENTS_PERIOD_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 210, 232, 10, 12
+	LTEXT "horas", IDC_FEATUREDEVENTS_PERIOD_UNIT, 222, 234, 40, 8, WS_CLIPSIBLINGS
+	RTEXT "Líneas de info (&T):", IDC_FEATUREDEVENTS_EVENTTEXTLINES_LABEL, 120, 250, 64, 8, WS_CLIPSIBLINGS
+	EDITTEXT IDC_FEATUREDEVENTS_EVENTTEXTLINES, 188, 248, 32, 12, WS_CLIPSIBLINGS | ES_NUMBER | ES_AUTOHSCROLL | WS_CLIPSIBLINGS
+	CONTROL "", IDC_FEATUREDEVENTS_EVENTTEXTLINES_SPIN, UPDOWN_CLASS, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPSIBLINGS | UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_NOTHOUSANDS | UDS_SETBUDDYINT, 210, 248, 10, 12
+	LTEXT "lín. (1~10)", IDC_FEATUREDEVENTS_EVENTTEXTLINES_UNIT, 222, 250, 40, 8, WS_CLIPSIBLINGS
+END
+
+IDD_FEATUREDEVENTSSEARCH DIALOG 0, 0, 420, 228
+CAPTION "Condición de búsqueda"
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	LTEXT "Nombre (&N):", -1, 8, 10, 32, 8
+	EDITTEXT IDC_FEATUREDEVENTSSEARCH_NAME, 40, 8, 80, 12, ES_AUTOHSCROLL
+	LTEXT "", IDC_FEATUREDEVENTSSEARCH_SETTINGSPLACE, 0, 20, 300, 176, NOT WS_VISIBLE
+	AUTOCHECKBOX "Especificar canales (&C)", IDC_FEATUREDEVENTSSEARCH_USESERVICELIST, 308, 8, 104, 9
+	CONTROL "", IDC_FEATUREDEVENTSSEARCH_SERVICELIST, WC_LISTVIEW, WS_CHILD | WS_VISIBLE | WS_BORDER | WS_HSCROLL | WS_VSCROLL | WS_TABSTOP | WS_CLIPSIBLINGS | LVS_REPORT | LVS_SINGLESEL | LVS_NOCOLUMNHEADER | LVS_ALIGNTOP, 308, 20, 104, 160
+	PUSHBUTTON "Todo", IDC_FEATUREDEVENTSSEARCH_SERVICELIST_CHECKALL, 336, 182, 36, 14
+	PUSHBUTTON "Nada", IDC_FEATUREDEVENTSSEARCH_SERVICELIST_UNCHECKALL, 376, 182, 36, 14
+	DEFPUSHBUTTON "Aceptar", IDOK, 312, 204, 48, 16
+	PUSHBUTTON "Cancelar", IDCANCEL, 364, 204, 48, 16
+END
+
+IDD_SURROUNDOPTIONS DIALOG 16, 16, 232, 244
+CAPTION "Ajustes de 5.1ch"
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	AUTOCHECKBOX "Usar matriz Downmix personalizada (&C)", IDC_SURROUND_USECUSTOMDOWNMIXMATRIX, 12, 8, 168, 9
+	CTEXT "FL", IDC_SURROUND_DOWNMIXMATRIX_FL_LABEL, 52, 20, 24, 8
+	CTEXT "FR", IDC_SURROUND_DOWNMIXMATRIX_FR_LABEL, 80, 20, 24, 8
+	CTEXT "FC", IDC_SURROUND_DOWNMIXMATRIX_FC_LABEL, 108, 20, 24, 8
+	CTEXT "LFE", IDC_SURROUND_DOWNMIXMATRIX_LFE_LABEL, 136, 20, 24, 8
+	CTEXT "SL", IDC_SURROUND_DOWNMIXMATRIX_SL_LABEL, 164, 20, 24, 8
+	CTEXT "SR", IDC_SURROUND_DOWNMIXMATRIX_SR_LABEL, 192, 20, 24, 8
+	RTEXT "Izq:", IDC_SURROUND_DOWNMIXMATRIX_L_LABEL, 24, 34, 24, 8
+	RTEXT "Der:", IDC_SURROUND_DOWNMIXMATRIX_R_LABEL, 24, 50, 24, 8
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_L_FL, 52, 32, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_L_FR, 80, 32, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_L_FC, 108, 32, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_L_LFE, 136, 32, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_L_SL, 164, 32, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_L_SR, 192, 32, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_R_FL, 52, 48, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_R_FR, 80, 48, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_R_FC, 108, 48, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_R_LFE, 136, 48, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_R_SL, 164, 48, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_DOWNMIXMATRIX_R_SR, 192, 48, 24, 12, ES_AUTOHSCROLL
+	PUSHBUTTON "Por defecto (&D)", IDC_SURROUND_DOWNMIXMATRIX_DEFAULT, 152, 62, 64, 14
+	GROUPBOX "", -1, 8, 8, 216, 76, WS_CLIPSIBLINGS
+
+	AUTOCHECKBOX "Usar matriz de mezcla personalizada (&M)", IDC_SURROUND_USECUSTOMMIXINGMATRIX, 12, 88, 168, 9
+	CTEXT "FL", IDC_SURROUND_MIXINGMATRIX_IN_FL_LABEL, 52, 100, 24, 8
+	CTEXT "FR", IDC_SURROUND_MIXINGMATRIX_IN_FR_LABEL, 80, 100, 24, 8
+	CTEXT "FC", IDC_SURROUND_MIXINGMATRIX_IN_FC_LABEL, 108, 100, 24, 8
+	CTEXT "LFE", IDC_SURROUND_MIXINGMATRIX_IN_LFE_LABEL, 136, 100, 24, 8
+	CTEXT "SL", IDC_SURROUND_MIXINGMATRIX_IN_SL_LABEL, 164, 100, 24, 8
+	CTEXT "SR", IDC_SURROUND_MIXINGMATRIX_IN_SR_LABEL, 192, 100, 24, 8
+	RTEXT "FL:", IDC_SURROUND_MIXINGMATRIX_OUT_FL_LABEL, 24, 114, 24, 8
+	RTEXT "FR:", IDC_SURROUND_MIXINGMATRIX_OUT_FR_LABEL, 24, 130, 24, 8
+	RTEXT "FC:", IDC_SURROUND_MIXINGMATRIX_OUT_FC_LABEL, 24, 146, 24, 8
+	RTEXT "LFE:", IDC_SURROUND_MIXINGMATRIX_OUT_LFE_LABEL, 24, 162, 24, 8
+	RTEXT "SL:", IDC_SURROUND_MIXINGMATRIX_OUT_SL_LABEL, 24, 178, 24, 8
+	RTEXT "SR:", IDC_SURROUND_MIXINGMATRIX_OUT_SR_LABEL, 24, 194, 24, 8
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FL_FL, 52, 112, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FL_FR, 80, 112, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FL_FC, 108, 112, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FL_LFE, 136, 112, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FL_SL, 164, 112, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FL_SR, 192, 112, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FR_FL, 52, 128, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FR_FR, 80, 128, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FR_FC, 108, 128, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FR_LFE, 136, 128, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FR_SL, 164, 128, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FR_SR, 192, 128, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FC_FL, 52, 144, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FC_FR, 80, 144, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FC_FC, 108, 144, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FC_LFE, 136, 144, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FC_SL, 164, 144, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_FC_SR, 192, 144, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_LFE_FL, 52, 160, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_LFE_FR, 80, 160, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_LFE_FC, 108, 160, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_LFE_LFE, 136, 160, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_LFE_SL, 164, 160, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_LFE_SR, 192, 160, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SL_FL, 52, 176, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SL_FR, 80, 176, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SL_FC, 108, 176, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SL_LFE, 136, 176, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SL_SL, 164, 176, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SL_SR, 192, 176, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SR_FL, 52, 192, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SR_FR, 80, 192, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SR_FC, 108, 192, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SR_LFE, 136, 192, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SR_SL, 164, 192, 24, 12, ES_AUTOHSCROLL
+	EDITTEXT IDC_SURROUND_MIXINGMATRIX_SR_SR, 192, 192, 24, 12, ES_AUTOHSCROLL
+	GROUPBOX "", -1, 8, 88, 216, 124, WS_CLIPSIBLINGS
+
+	DEFPUSHBUTTON "Aceptar", IDOK, 124, 220, 48, 16
+	PUSHBUTTON "Cancelar", IDCANCEL, 176, 220, 48, 16
+END
+
+IDD_CHANNELINPUTOPTIONS DIALOG 16, 16, 192, 118
+CAPTION "Ajustes de entrada de Nº de canal"
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 84, 96, 48, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 136, 96, 48, 14
+	PUSHBUTTON "Ayuda (&H)", IDC_CHANNELINPUT_HELP, 8, 96, 48, 14
+
+	RTEXT "Teclas numéricas (&D):", -1, 8, 10, 72, 8
+	COMBOBOX IDC_CHANNELINPUT_DIGITKEYMODE, 84, 8, 96, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	RTEXT "Teclado numérico (&N):", -1, 8, 26, 72, 8
+	COMBOBOX IDC_CHANNELINPUT_NUMPADKEYMODE, 84, 24, 96, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	RTEXT "Teclas F1~F12 (&F):", -1, 8, 42, 72, 8
+	COMBOBOX IDC_CHANNELINPUT_FUNCTIONKEYMODE, 84, 40, 96, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	RTEXT "Tiempo espera (&T):", -1, 8, 62, 72, 8
+	EDITTEXT IDC_CHANNELINPUT_TIMEOUT, 84, 60, 32, 12, ES_NUMBER | ES_AUTOHSCROLL
+	LTEXT "ms (1/1000 seg)", -1, 120, 62, 64, 8
+	RTEXT "Al expirar tiempo (&I):", -1, 8, 78, 72, 8
+	COMBOBOX IDC_CHANNELINPUT_TIMEOUTMODE, 84, 76, 96, 64, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+END
+
+IDD_DIRECTWRITEOPTIONS DIALOG 16, 16, 236, 154
+CAPTION "Ajustes de DirectWrite"
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+FONT DIALOG_FONT_SIZE, DIALOG_FONT_NAME
+BEGIN
+	DEFPUSHBUTTON "Aceptar", IDOK, 132, 132, 48, 14
+	PUSHBUTTON "Cancelar", IDCANCEL, 184, 132, 48, 14
+	PUSHBUTTON "Probar (&T)", IDC_DIRECTWRITEOPTIONS_TEST, 8, 132, 48, 14
+
+	AUTOCHECKBOX "Modo renderizado (&M)", IDC_DIRECTWRITEOPTIONS_RENDERINGMODE_ENABLE, 8, 10, 90, 9
+	COMBOBOX IDC_DIRECTWRITEOPTIONS_RENDERINGMODE, 100, 8, 128, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	AUTOCHECKBOX "Gamma (&G)", IDC_DIRECTWRITEOPTIONS_GAMMA_ENABLE, 8, 26, 88, 9
+	EDITTEXT IDC_DIRECTWRITEOPTIONS_GAMMA, 100, 24, 24, 12, ES_AUTOHSCROLL
+	LTEXT "(0.01~256)", IDC_DIRECTWRITEOPTIONS_GAMMA_RANGE, 128, 26, 48, 8
+	AUTOCHECKBOX "Contraste (&C)", IDC_DIRECTWRITEOPTIONS_ENHANCEDCONTRAST_ENABLE, 8, 42, 88, 9
+	EDITTEXT IDC_DIRECTWRITEOPTIONS_ENHANCEDCONTRAST, 100, 40, 24, 12, ES_AUTOHSCROLL
+	LTEXT "(0~)", IDC_DIRECTWRITEOPTIONS_ENHANCEDCONTRAST_RANGE, 128, 42, 24, 8
+	AUTOCHECKBOX "Nivel ClearType (&L)", IDC_DIRECTWRITEOPTIONS_CLEARTYPELEVEL_ENABLE, 8, 58, 88, 9
+	EDITTEXT IDC_DIRECTWRITEOPTIONS_CLEARTYPELEVEL, 100, 56, 24, 12, ES_AUTOHSCROLL
+	LTEXT "(0.00~1.00)", IDC_DIRECTWRITEOPTIONS_CLEARTYPELEVEL_RANGE, 128, 56, 48, 8
+	AUTOCHECKBOX "Geometría píxel (&P)", IDC_DIRECTWRITEOPTIONS_PIXELGEOMETRY_ENABLE, 8, 74, 88, 9
+	COMBOBOX IDC_DIRECTWRITEOPTIONS_PIXELGEOMETRY, 100, 72, 64, 80, WS_VSCROLL | WS_TABSTOP | CBS_DROPDOWNLIST
+	LTEXT "", IDC_DIRECTWRITEOPTIONS_PREVIEW, 8, 92, 220, 32, SS_OWNERDRAW | SS_SUNKEN
+END
+
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION
+ PRODUCTVERSION VERSION_MAJOR, VERSION_MINOR, VERSION_BUILD, VERSION_REVISION
+ FILEFLAGSMASK 0x3FL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "041104B0"
+		BEGIN
+			VALUE "Comments", "Digital Television Test Program\0"
+			VALUE "CompanyName", APP_NAME_A "\0"
+			VALUE "FileDescription", APP_NAME_A "\0"
+			VALUE "FileVersion", VERSION_TEXT_A "\0"
+			VALUE "InternalName", APP_NAME_A "\0"
+			VALUE "LegalCopyright", APP_NAME_A "\0"
+			VALUE "OriginalFilename", APP_NAME_A ".exe\0"
+#ifdef _DEBUG
+			VALUE "PrivateBuild", "\0"
+#endif
+			VALUE "ProductName", APP_NAME_A "\0"
+			VALUE "ProductVersion", VERSION_TEXT_A "\0"
+#ifdef _DEBUG
+			VALUE "SpecialBuild", "\0"
+#endif
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x411, 1200
+	END
+END
