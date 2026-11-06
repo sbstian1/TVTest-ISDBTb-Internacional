@@ -87,6 +87,17 @@ bool VideoRenderer_FrankyRenderer::Initialize(
 		return false;
 	}
 
+	// FrankyRenderer registers PlaceboRendererVideoWindow without CS_DBLCLKS.
+	// Enable CS_DBLCLKS on its child window class so double-click fullscreen works.
+	HWND hwndChild = ::FindWindowEx(m_hwndVideo, nullptr, TEXT("PlaceboRendererVideoWindow"), nullptr);
+	if (hwndChild == nullptr)
+		hwndChild = ::GetWindow(m_hwndVideo, GW_CHILD);
+	if (hwndChild != nullptr) {
+		const ULONG_PTR Style = ::GetClassLongPtr(hwndChild, GCL_STYLE);
+		if ((Style & CS_DBLCLKS) == 0)
+			::SetClassLongPtr(hwndChild, GCL_STYLE, Style | CS_DBLCLKS);
+	}
+
 	m_hwndRender = hwndRender;
 	m_hwndMessageDrain = hwndMessageDrain;
 
@@ -125,6 +136,13 @@ bool VideoRenderer_FrankyRenderer::SetVideoPosition(
 
 	::OffsetRect(&rcDest, -rcDest.left, -rcDest.top);
 
+	HWND hwndChild = ::GetWindow(m_hwndVideo, GW_CHILD);
+	if (hwndChild != nullptr) {
+		const ULONG_PTR Style = ::GetClassLongPtr(hwndChild, GCL_STYLE);
+		if ((Style & CS_DBLCLKS) == 0)
+			::SetClassLongPtr(hwndChild, GCL_STYLE, Style | CS_DBLCLKS);
+	}
+
 	return VideoRenderer_Basic::SetVideoPosition(SourceWidth, SourceHeight, SourceRect, rcDest, rcDest);
 }
 
@@ -150,6 +168,7 @@ bool VideoRenderer_FrankyRenderer::GetDestPosition(ReturnArg<RECT> Rect)
 bool VideoRenderer_FrankyRenderer::ShowCursor(bool Show)
 {
 	m_ShowCursor = Show;
+	VideoRenderer_Basic::ShowCursor(Show);
 
 	return true;
 }
@@ -186,6 +205,17 @@ LRESULT CALLBACK VideoRenderer_FrankyRenderer::VideoWndProc(HWND hwnd, UINT uMsg
 			::SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(pThis));
 		}
 		return 0;
+
+	case WM_PARENTNOTIFY:
+		if (LOWORD(wParam) == WM_CREATE) {
+			HWND hwndChild = reinterpret_cast<HWND>(lParam);
+			if (hwndChild != nullptr) {
+				const ULONG_PTR Style = ::GetClassLongPtr(hwndChild, GCL_STYLE);
+				if ((Style & CS_DBLCLKS) == 0)
+					::SetClassLongPtr(hwndChild, GCL_STYLE, Style | CS_DBLCLKS);
+			}
+		}
+		break;
 
 	case WM_CHAR:
 	case WM_DEADCHAR:
