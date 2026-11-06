@@ -54,6 +54,7 @@ namespace LibISDB::DirectShow
 			madVR,              /**< madVR */
 			EVRCustomPresenter, /**< EVR Custom Presenter */
 			MPCVideoRenderer,   /**< MPC Video Renderer */
+			FrankyRenderer,     /**< FrankyRenderer */
 		};
 
 		VideoRenderer() = default;

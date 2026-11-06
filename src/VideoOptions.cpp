@@ -44,6 +44,7 @@ const CVideoOptions::RendererInfo CVideoOptions::m_RendererList[] = {
 	//{LibISDB::DirectShow::VideoRenderer::RendererType::OverlayMixer,       TEXT("Overlay Mixer")},
 	{LibISDB::DirectShow::VideoRenderer::RendererType::madVR,              TEXT("madVR")},
 	{LibISDB::DirectShow::VideoRenderer::RendererType::MPCVideoRenderer,   TEXT("MPC Video Renderer")},
+	{LibISDB::DirectShow::VideoRenderer::RendererType::FrankyRenderer,     TEXT("FrankyRenderer")},
 };
 
 

@@ -79,13 +79,13 @@ Para obtener la mejor calidad de imagen, estabilidad y aceleración por hardware
   * Paquete de filtros DirectShow de código abierto basado en FFmpeg. Ofrece decodificación rápida, compatibilidad total con aceleración por hardware (D3D11 / DXVA2 copy-back) y excelente estabilidad.
   * Descargas: [LAV Filters Releases](https://github.com/nevcairiel/lavfilters/releases)
 
-* **Renderizador de Video:** **[MPC Video Renderer](https://github.com/Aleksoid1978/VideoRenderer)**
-  * Renderizador de video moderno basado en Direct3D 11. Proporciona bajo consumo de CPU/GPU, sincronización precisa y desentrelazado de alta fidelidad para transmisiones de TV abierta.
-  * Descargas: [MPC Video Renderer Releases](https://github.com/Aleksoid1978/VideoRenderer/releases)
+* **Renderizador de Video:** **[MPC Video Renderer](https://github.com/Aleksoid1978/VideoRenderer)** / **[FrankyRenderer](https://github.com/mryx007/FrankyRenderer)**
+  * **MPC Video Renderer**: Renderizador de video moderno basado en Direct3D 11. Proporciona bajo consumo de CPU/GPU, sincronización precisa y desentrelazado de alta fidelidad para transmisiones de TV abierta ([MPC Video Renderer Releases](https://github.com/Aleksoid1978/VideoRenderer/releases)).
+  * **FrankyRenderer**: Renderizador de video DirectShow (x64) de alto rendimiento impulsado por **libplacebo** y **Direct3D 11**, con soporte nativo integrado en este fork para escalado avanzado, mapeo de tonos HDR y procesamiento de imagen ([FrankyRenderer Releases](https://github.com/mryx007/FrankyRenderer/releases)).
 
 > **Configuración en TVTest:**  
-> En **Ajustes > Reproducción**, configure:
-> * **Renderizador de video:** `MPC Video Renderer` (o `EVR Custom Presenter`)
+> En **Ajustes > Video**, configure:
+> * **Renderizador de video:** `MPC Video Renderer`, `FrankyRenderer` (o `EVR Custom Presenter`)
 > * **Decodificador de video:** `LAV Video Decoder`
 
 ---
