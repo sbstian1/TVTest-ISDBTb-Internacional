@@ -48,11 +48,11 @@ void CTunerControlItem::Draw(HDC hdc, const RECT &Rect)
 			ChannelManager.GetTuningSpaceName(
 				pChInfo != nullptr ? pChInfo->GetSpace() : ChannelManager.GetCurrentSpace());
 		if (pszText == nullptr)
-			pszText = TEXT("<Sintoniz.>");
+			pszText = GetAppClass().LanguageManager.Translate(TEXT("<Sintoniz.>"));
 	} else if (ChannelManager.GetCurrentSpace() == CChannelManager::SPACE_ALL) {
-		pszText = TEXT("Todos");
+		pszText = GetAppClass().LanguageManager.Translate(TEXT("Todos"));
 	} else {
-		pszText = TEXT("<Sintoniz.>");
+		pszText = GetAppClass().LanguageManager.Translate(TEXT("<Sintoniz.>"));
 	}
 	RECT rc = Rect;
 	Style::Subtract(&rc, m_pControlPanel->GetItemPadding());
@@ -101,7 +101,7 @@ void CChannelControlItem::Draw(HDC hdc, const RECT &Rect)
 	} else if ((pInfo = ChannelManager.GetCurrentChannelInfo()) != nullptr) {
 		StringFormat(szText, TEXT("{}: {}"), pInfo->GetChannelNo() > 0 ? (pInfo->FormatChannelNo(szNo, lengthof(szNo)), szNo) : TEXT(""), pInfo->GetName());
 	} else {
-		StringCopy(szText, TEXT("<Canal>"));
+		StringCopy(szText, GetAppClass().LanguageManager.Translate(TEXT("<Canal>")));
 	}
 	RECT rc = Rect;
 	Style::Subtract(&rc, m_pControlPanel->GetItemPadding());
@@ -285,7 +285,7 @@ void CAudioControlItem::Draw(HDC hdc, const RECT &Rect)
 
 	TCHAR szText[64];
 	if (App.UICore.FormatCurrentAudioText(szText, lengthof(szText)) <= 0)
-		StringCopy(szText, TEXT("<Audio>"));
+		StringCopy(szText, GetAppClass().LanguageManager.Translate(TEXT("<Audio>")));
 	::DrawText(
 		hdc, szText, -1, &rc,
 		DT_LEFT | DT_SINGLELINE | DT_VCENTER | DT_NOPREFIX | DT_END_ELLIPSIS);
@@ -321,7 +321,7 @@ void CControlPanelButton::CalcSize(int Width, SIZE *pSize)
 	const Style::Margins &Padding = m_pControlPanel->GetItemPadding();
 
 	if (m_Width < 0)
-		CalcTextSize(m_Text.c_str(), pSize);
+		CalcTextSize(GetAppClass().LanguageManager.Translate(m_Text.c_str()), pSize);
 	else
 		pSize->cx = m_Width * m_pControlPanel->GetFontHeight();
 	pSize->cx += Padding.Horz();
@@ -333,7 +333,7 @@ void CControlPanelButton::Draw(HDC hdc, const RECT &Rect)
 	RECT rc = Rect;
 	Style::Subtract(&rc, m_pControlPanel->GetItemPadding());
 	::DrawText(
-		hdc, m_Text.c_str(), -1, &rc,
+		hdc, GetAppClass().LanguageManager.Translate(m_Text.c_str()), -1, &rc,
 		DT_CENTER | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX);
 }
 

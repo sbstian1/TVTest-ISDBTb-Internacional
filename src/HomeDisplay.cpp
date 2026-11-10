@@ -491,7 +491,7 @@ public:
 
 // CHomeDisplay::CCategory
 	int GetID() const override { return CATEGORY_ID_FAVORITES; }
-	LPCTSTR GetTitle() const override { return TEXT("Favoritos"); }
+	LPCTSTR GetTitle() const override { return GetAppClass().LanguageManager.Translate(TEXT("Favoritos")); }
 	int GetIconIndex() const override { return CATEGORY_ICON_FAVORITES; }
 	bool Create() override;
 	bool OnDecide() override;
@@ -582,7 +582,7 @@ public:
 
 // CHomeDisplay::CCategory
 	int GetID() const override { return CATEGORY_ID_RECENT_CHANNELS; }
-	LPCTSTR GetTitle() const override { return TEXT("Canales recientes"); }
+	LPCTSTR GetTitle() const override { return GetAppClass().LanguageManager.Translate(TEXT("Canales recientes")); }
 	int GetIconIndex() const override { return CATEGORY_ICON_RECENT_CHANNELS; }
 	bool Create() override;
 	void ReadSettings(CSettings &Settings) override;
@@ -667,7 +667,7 @@ public:
 
 // CHomeDisplay::CCategory
 	int GetID() const override { return CATEGORY_ID_FEATURED_EVENTS; }
-	LPCTSTR GetTitle() const override { return TEXT("Programas destacados"); }
+	LPCTSTR GetTitle() const override { return GetAppClass().LanguageManager.Translate(TEXT("Programas destacados")); }
 	int GetIconIndex() const override { return CATEGORY_ICON_FEATURED_EVENTS; }
 	int GetHeight() const override { return m_Height; }
 	bool Create() override;
@@ -838,9 +838,9 @@ void CFeaturedEventsCategory::Draw(
 	if (m_ItemList.empty()) {
 		LPCTSTR pszText;
 		if (Settings.GetSearchSettingsList().GetCount() == 0) {
-			pszText = TEXT("Para ver programas destacados, registre criterios de búsqueda en [Configurar programas destacados] del menú clic derecho.");
+			pszText = GetAppClass().LanguageManager.Translate(TEXT("Para ver programas destacados, registre criterios de búsqueda en [Configurar programas destacados] del menú clic derecho."));
 		} else {
-			pszText = TEXT("No se encontraron programas.");
+			pszText = GetAppClass().LanguageManager.Translate(TEXT("No se encontraron programas."));
 		}
 		RECT rc = ContentRect;
 		Style::Subtract(&rc, Style.ItemMargins);

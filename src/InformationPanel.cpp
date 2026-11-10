@@ -1469,12 +1469,13 @@ void CInformationPanel::CRecordItem::Draw(HDC hdc, const RECT &Rect)
 				static_cast<unsigned int>(m_DiskFreeSpace / static_cast<ULONGLONG>(1024 * 1024 * 1024 / 100));
 			StringFormat(
 				szText + Length, lengthof(szText) - Length,
-				TEXT(" / {}.{:02} GB libres"),
-				FreeSpace / 100, FreeSpace % 100);
+				TEXT(" / {}.{:02} {}"),
+				FreeSpace / 100, FreeSpace % 100,
+				GetAppClass().LanguageManager.Translate(TEXT("GB libres")));
 		}
 		DrawItem(hdc, Rect, szText);
 	} else {
-		DrawItem(hdc, Rect, TEXT("■ <Sin grabar>"));
+		DrawItem(hdc, Rect, GetAppClass().LanguageManager.Translate(TEXT("■ <Sin grabar>")));
 	}
 }
 
@@ -1543,7 +1544,7 @@ bool CInformationPanel::CProgramInfoItem::Update()
 	CStaticStringFormatter Formatter(szText, lengthof(szText));
 
 	if (m_fNext)
-		Formatter.Append(TEXT("Sig : "));
+		Formatter.Append(GetAppClass().LanguageManager.Translate(TEXT("Sig : ")));
 
 	LibISDB::EventInfo EventInfo;
 
@@ -1678,11 +1679,11 @@ bool CInformationPanel::CProgramInfoItem::GetButtonTipText(int Button, LPTSTR ps
 {
 	switch (Button) {
 	case BUTTON_PREV:
-		StringCopy(pszText, TEXT("Programa actual"), MaxText);
+		StringCopy(pszText, GetAppClass().LanguageManager.Translate(TEXT("Programa actual")), MaxText);
 		return true;
 
 	case BUTTON_NEXT:
-		StringCopy(pszText, TEXT("Programa siguiente"), MaxText);
+		StringCopy(pszText, GetAppClass().LanguageManager.Translate(TEXT("Programa siguiente")), MaxText);
 		return true;
 	}
 

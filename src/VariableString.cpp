@@ -207,7 +207,7 @@ bool CVariableStringMap::InputParameter(HWND hDlg, int EditID, const RECT &DropD
 
 		if (!Group.Text.empty()) {
 			hmenu = ::CreatePopupMenu();
-			Menu.Append(hmenu, Group.Text.c_str());
+			Menu.Append(hmenu, GetAppClass().LanguageManager.Translate(Group.Text.c_str()));
 		} else {
 			hmenu = Menu.GetPopupHandle();
 		}
@@ -218,7 +218,7 @@ bool CVariableStringMap::InputParameter(HWND hDlg, int EditID, const RECT &DropD
 			TCHAR szText[128];
 			StringFormat(
 				szText, TEXT("{}\t%{}%"),
-				Param.pszText, Param.pszParameter);
+				GetAppClass().LanguageManager.Translate(Param.pszText), Param.pszParameter);
 			::AppendMenu(hmenu, MF_STRING | MF_ENABLED, (i << 10) | (j + 1), szText);
 		}
 	}
@@ -653,19 +653,19 @@ bool CEventVariableStringMap::GetSampleEventInfo(EventInfo *pInfo)
 	pInfo->Channel.SetSpace(0);
 	pInfo->Channel.SetChannelIndex(8);
 	pInfo->Channel.SetChannelNo(13);
-	pInfo->Channel.SetName(TEXT("Canal Ejemplo HD"));
+	pInfo->Channel.SetName(GetAppClass().LanguageManager.Translate(TEXT("Canal Ejemplo HD")));
 	pInfo->Channel.SetNetworkID(0x1234);
 	pInfo->Channel.SetTransportStreamID(0x1234);
 	pInfo->Channel.SetServiceID(123);
 	pInfo->Channel.SetTunerName(TEXT("BonDriver_TV.dll"));
-	pInfo->ServiceName = TEXT("Servicio 1");
+	pInfo->ServiceName = GetAppClass().LanguageManager.Translate(TEXT("Servicio 1"));
 	pInfo->TOTTime = Time;
 	pInfo->Event.NetworkID = 0x1234;
 	pInfo->Event.TransportStreamID = 0x1234;
 	pInfo->Event.ServiceID = 123;
 	pInfo->Event.EventID = 0xABCD;
-	pInfo->Event.EventName = TEXT("[Dual][Sub] Noticias del Día");
-	pInfo->Event.EventText = TEXT("Emisión de noticias y actualidad.");
+	pInfo->Event.EventName = GetAppClass().LanguageManager.Translate(TEXT("[Dual][Sub] Noticias del Día"));
+	pInfo->Event.EventText = GetAppClass().LanguageManager.Translate(TEXT("Emisión de noticias y actualidad."));
 	Time.OffsetMinutes(5);
 	Time.Minute = Time.Minute / 5 * 5;
 	Time.Second = 0;

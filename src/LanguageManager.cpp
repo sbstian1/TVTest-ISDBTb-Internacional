@@ -23,6 +23,7 @@
 #include "AppMain.h"
 #include "LanguageManager.h"
 #include "PathUtil.h"
+#include "resource.h"
 #include <algorithm>
 
 
@@ -384,8 +385,9 @@ namespace TVTest
 						}
 					} else if (_wcsicmp(szClassName, WC_LISTVIEW) == 0) {
 						HWND hwndHeader = ListView_GetHeader(hwndChild);
+						int colCount = 1;
 						if (hwndHeader != nullptr) {
-							const int colCount = Header_GetItemCount(hwndHeader);
+							colCount = Header_GetItemCount(hwndHeader);
 							for (int c = 0; c < colCount; c++) {
 								wchar_t szColText[256] = {};
 								HDITEM hdi = {};
@@ -399,6 +401,48 @@ namespace TVTest
 										Header_SetItem(hwndHeader, c, &hdi);
 									}
 								}
+							}
+							if (colCount < 1)
+								colCount = 1;
+						}
+						const int itemCount = ListView_GetItemCount(hwndChild);
+						for (int row = 0; row < itemCount; row++) {
+							for (int col = 0; col < colCount; col++) {
+								wchar_t szItemText[256] = {};
+								ListView_GetItemText(hwndChild, row, col, szItemText, 255);
+								if (szItemText[0] != L'\0') {
+									auto itItem = pMap->find(szItemText);
+									if (itItem != pMap->end() && !itItem->second.empty()) {
+										ListView_SetItemText(hwndChild, row, col, const_cast<wchar_t*>(itItem->second.c_str()));
+									}
+								}
+							}
+						}
+					} else if (_wcsicmp(szClassName, L"ComboBox") == 0 && ::GetDlgCtrlID(hwndChild) != IDC_OPTIONS_LANGUAGE) {
+						const int itemCount = static_cast<int>(::SendMessage(hwndChild, CB_GETCOUNT, 0, 0));
+						if (itemCount > 0 && itemCount != CB_ERR) {
+							const int curSel = static_cast<int>(::SendMessage(hwndChild, CB_GETCURSEL, 0, 0));
+							bool fChangedAny = false;
+							for (int idx = 0; idx < itemCount; idx++) {
+								const LRESULT textLen = ::SendMessage(hwndChild, CB_GETLBTEXTLEN, idx, 0);
+								if (textLen > 0 && textLen < 512) {
+									wchar_t szItemText[512] = {};
+									if (::SendMessage(hwndChild, CB_GETLBTEXT, idx, reinterpret_cast<LPARAM>(szItemText)) != CB_ERR) {
+										auto itItem = pMap->find(szItemText);
+										if (itItem != pMap->end() && !itItem->second.empty() && itItem->second != szItemText) {
+											const LRESULT itemData = ::SendMessage(hwndChild, CB_GETITEMDATA, idx, 0);
+											::SendMessage(hwndChild, CB_DELETESTRING, idx, 0);
+											::SendMessage(hwndChild, CB_INSERTSTRING, idx, reinterpret_cast<LPARAM>(itItem->second.c_str()));
+											if (itemData != CB_ERR) {
+												::SendMessage(hwndChild, CB_SETITEMDATA, idx, itemData);
+											}
+											fChangedAny = true;
+										}
+									}
+								}
+							}
+							if (fChangedAny && curSel != CB_ERR) {
+								::SendMessage(hwndChild, CB_SETCURSEL, curSel, 0);
 							}
 						}
 					}

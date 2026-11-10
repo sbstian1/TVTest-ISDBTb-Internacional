@@ -133,7 +133,7 @@ int FormatEventTime(
 			}
 		} else {
 			if (!!(Flags & FormatEventTimeFlag::UndecidedText))
-				StringCopy(szEndTime, TEXT("(Fin por determinar)"));
+				StringCopy(szEndTime, GetAppClass().LanguageManager.Translate(TEXT("(Fin por determinar)")));
 		}
 	}
 
@@ -808,14 +808,16 @@ LPCTSTR CEpgGenre::GetText(int Level1, int Level2) const
 
 	if (Level2 < 0) {
 		if (Level1 >= 0 && Level1 < lengthof(GenreList))
-			return GenreList[Level1].pszText;
+			return GetAppClass().LanguageManager.Translate(GenreList[Level1].pszText);
 		if (Level1 == GENRE_OTHER)
-			return TEXT("Otros");
+			return GetAppClass().LanguageManager.Translate(TEXT("Otros"));
 		return nullptr;
 	}
 	if (Level1 >= 0 && Level1 < lengthof(GenreList)
 			&& Level2 >= 0 && Level2 < 16)
-		return GenreList[Level1].pszSubText[Level2];
+		return GenreList[Level1].pszSubText[Level2] != nullptr
+			? GetAppClass().LanguageManager.Translate(GenreList[Level1].pszSubText[Level2])
+			: nullptr;
 	return nullptr;
 }
 

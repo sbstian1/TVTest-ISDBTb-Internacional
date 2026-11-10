@@ -1041,7 +1041,7 @@ LPCTSTR CColorScheme::GetColorName(int Type)
 {
 	if (Type < 0 || Type >= NUM_COLORS)
 		return nullptr;
-	return m_ColorInfoList[Type].pszName;
+	return GetAppClass().LanguageManager.Translate(m_ColorInfoList[Type].pszName);
 }
 
 

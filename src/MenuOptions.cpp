@@ -515,7 +515,7 @@ void CMenuOptions::SetDlgItemState(HWND hDlg)
 void CMenuOptions::GetItemText(int ID, LPTSTR pszText, int MaxLength) const
 {
 	if (ID == MENU_ID_SEPARATOR) {
-		StringCopy(pszText, TEXT("  <Separador>"), MaxLength);
+		StringCopy(pszText, GetAppClass().LanguageManager.Translate(TEXT("  <Separador>")), MaxLength);
 	} else {
 		for (const MenuInfo &Item : m_DefaultMenuItemList) {
 			if (Item.ID == ID) {
@@ -523,6 +523,9 @@ void CMenuOptions::GetItemText(int ID, LPTSTR pszText, int MaxLength) const
 					GetAppClass().GetResourceInstance(),
 					Item.TextID,
 					pszText, MaxLength);
+				LPCTSTR pszTrans = GetAppClass().LanguageManager.Translate(pszText);
+				if (pszTrans != pszText)
+					StringCopy(pszText, pszTrans, MaxLength);
 				return;
 			}
 		}

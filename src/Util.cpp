@@ -21,6 +21,7 @@
 #include "stdafx.h"
 #include <math.h>
 #include "TVTest.h"
+#include "AppMain.h"
 #include "Util.h"
 #include "DPIUtil.h"
 #include "Common/DebugDef.h"
@@ -352,7 +353,7 @@ LPCTSTR GetDayOfWeekText(int DayOfWeek)
 	if (DayOfWeek < 0 || DayOfWeek > 6)
 		return TEXT("？");
 	static const TCHAR * const DayNames[] = { TEXT("Do"), TEXT("Lu"), TEXT("Ma"), TEXT("Mi"), TEXT("Ju"), TEXT("Vi"), TEXT("Sá") };
-	return DayNames[DayOfWeek];
+	return GetAppClass().LanguageManager.Translate(DayNames[DayOfWeek]);
 }
 
 
