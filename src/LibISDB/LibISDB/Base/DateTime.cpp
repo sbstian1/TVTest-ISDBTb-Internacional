@@ -492,6 +492,38 @@ bool DateTime::ToLocal() noexcept
 }
 
 
+bool DateTime::ToUTC() noexcept
+{
+#ifdef LIBISDB_WINDOWS
+
+	const ::SYSTEMTIME Local = ToSYSTEMTIME();
+	::SYSTEMTIME UTC;
+
+	if (!::TzSpecificLocalTimeToSystemTime(nullptr, &Local, &UTC))
+		return false;
+
+	FromSYSTEMTIME(UTC);
+
+	return true;
+
+#else // LIBISDB_WINDOWS
+
+	std::tm Tm = ToTm();
+	const std::time_t Time = ::mktime(&Tm);
+	if (Time == static_cast<std::time_t>(-1))
+		return false;
+
+	if (::gmtime_r(&Time, &Tm) == nullptr)
+		return false;
+
+	FromTm(Tm);
+
+	return true;
+
+#endif // !def LIBISDB_WINDOWS
+}
+
+
 void DateTime::SetDayOfWeek() noexcept
 {
 	if (IsValid())

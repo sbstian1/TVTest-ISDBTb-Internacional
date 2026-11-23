@@ -151,11 +151,10 @@ bool EventInfo::GetEndTimeUTC(ReturnArg<DateTime> Time) const
 	if (!Time)
 		return false;
 
-	if (StartTime.IsValid()) {
-		Time = StartTime;
-		if (Time->OffsetSeconds((-9 * 60 * 60) + Duration))
-			return true;
-	}
+	DateTime EndTime;
+
+	if (GetEndTime(&EndTime) && EPGTimeToUTCTime(EndTime, Time))
+		return true;
 
 	Time->Reset();
 
@@ -266,7 +265,7 @@ const EventInfo::AudioInfo * EventInfo::GetMainAudioInfo() const
 
 
 
-// EPGの日時(UTC+9)からUTCに変換する
+// EPGの日時(ローカル日時)からUTCに変換する
 bool EPGTimeToUTCTime(const DateTime &EPGTime, ReturnArg<DateTime> UTCTime)
 {
 	if (!UTCTime)
@@ -274,7 +273,7 @@ bool EPGTimeToUTCTime(const DateTime &EPGTime, ReturnArg<DateTime> UTCTime)
 
 	UTCTime = EPGTime;
 
-	if (UTCTime->OffsetSeconds(-9 * 60 * 60))
+	if (UTCTime->ToUTC())
 		return true;
 
 	UTCTime->Reset();
@@ -283,7 +282,7 @@ bool EPGTimeToUTCTime(const DateTime &EPGTime, ReturnArg<DateTime> UTCTime)
 }
 
 
-// UTCからEPGの日時(UTC+9)に変換する
+// UTCからEPGの日時(ローカル日時)に変換する
 bool UTCTimeToEPGTime(const DateTime &UTCTime, ReturnArg<DateTime> EPGTime)
 {
 	if (!EPGTime)
@@ -291,7 +290,7 @@ bool UTCTimeToEPGTime(const DateTime &UTCTime, ReturnArg<DateTime> EPGTime)
 
 	EPGTime = UTCTime;
 
-	if (EPGTime->OffsetSeconds(9 * 60 * 60))
+	if (EPGTime->ToLocal())
 		return true;
 
 	EPGTime->Reset();
@@ -300,14 +299,16 @@ bool UTCTimeToEPGTime(const DateTime &UTCTime, ReturnArg<DateTime> EPGTime)
 }
 
 
-// EPGの日時(UTC+9)からローカル日時に変換する
+// EPGの日時(ローカル日時)からローカル日時に変換する
 bool EPGTimeToLocalTime(const DateTime &EPGTime, ReturnArg<DateTime> LocalTime)
 {
 	if (!LocalTime)
 		return false;
 
-	if (EPGTimeToUTCTime(EPGTime, LocalTime) && LocalTime->ToLocal())
+	if (EPGTime.IsValid()) {
+		LocalTime = EPGTime;
 		return true;
+	}
 
 	LocalTime->Reset();
 
@@ -315,15 +316,13 @@ bool EPGTimeToLocalTime(const DateTime &EPGTime, ReturnArg<DateTime> LocalTime)
 }
 
 
-// 現在の日時をEPGの日時(UTC+9)で取得する
+// 現在の日時をEPGの日時(ローカル日時)で取得する
 bool GetCurrentEPGTime(ReturnArg<DateTime> Time)
 {
 	if (!Time)
 		return false;
 
-	Time->NowUTC();
-
-	if (Time->OffsetSeconds(9 * 60 * 60))
+	if (Time->NowLocal())
 		return true;
 
 	Time->Reset();

@@ -90,6 +90,7 @@ namespace LibISDB
 		bool NowLocal() noexcept;
 		bool NowUTC() noexcept;
 		bool ToLocal() noexcept;
+		bool ToUTC() noexcept;
 		void SetDayOfWeek() noexcept;
 
 		void TruncateToSeconds() noexcept;

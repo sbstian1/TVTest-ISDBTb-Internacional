@@ -156,7 +156,7 @@ namespace TVTest
 		bool m_fUpdateCSExtended = false;
 		bool m_fUseEDCBData = false;
 		CFilePath m_EDCBDataFolder;
-		EpgTimeMode m_EpgTimeMode = EpgTimeMode::JST;
+		EpgTimeMode m_EpgTimeMode = EpgTimeMode::Local;
 		bool m_fSaveLogoFile = true;
 		CFilePath m_LogoFileName{TEXT("LogoData")};
 

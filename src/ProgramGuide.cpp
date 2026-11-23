@@ -2083,7 +2083,7 @@ void CProgramGuide::DrawTimeBar(HDC hdc, const RECT &Rect, Theme::CThemeDraw &Th
 		TCHAR szText[64];
 		if (m_ListMode == ListMode::Services && (i == 0 || DispTime.Hour % 3 == 0)) {
 			StringFormat(
-				szText, TEXT("{}/{}({}) {}時"),
+				szText, TEXT("{}/{}({}) {:02}:00"),
 				DispTime.Month, DispTime.Day,
 				GetDayOfWeekText(DispTime.DayOfWeek),
 				DispTime.Hour);
@@ -2845,7 +2845,7 @@ void CProgramGuide::SetCaption()
 					Info.EndTime.OffsetHours(-1);
 					StringFormat(
 						szText,
-						TITLE_TEXT TEXT(" - {}{}{}/{}({}) {}時 ～ {}/{}({}) {}時"),
+						TITLE_TEXT TEXT(" - {}{}{}/{}({}) {:02}:00 ~ {}/{}({}) {:02}:00"),
 						Info.pszRelativeDayText != nullptr ? Info.pszRelativeDayText : TEXT(""),
 						Info.pszRelativeDayText != nullptr ? TEXT(" ") : TEXT(""),
 						Info.BeginningTime.Month,
@@ -2861,7 +2861,7 @@ void CProgramGuide::SetCaption()
 					Last.OffsetDays(6);
 					StringFormat(
 						szText,
-						TITLE_TEXT TEXT(" - {} {}/{}({}) ～ {}/{}({})"),
+						TITLE_TEXT TEXT(" - {} {}/{}({}) ~ {}/{}({})"),
 						m_ServiceList.GetItem(m_WeekListService)->GetServiceName(),
 						Info.BeginningTime.Month,
 						Info.BeginningTime.Day,
@@ -3394,53 +3394,37 @@ bool CProgramGuide::GetDayTimeRange(int Day, LibISDB::DateTime *pFirstTime, LibI
 		} else {
 			int Begin = m_BeginHour * 60;
 			const CEpgOptions::EpgTimeMode TimeMode = GetAppClass().EpgOptions.GetEpgTimeMode();
-			bool fUTC = false;
 
-			switch (TimeMode) {
-			case CEpgOptions::EpgTimeMode::Local:
-				{
-					TIME_ZONE_INFORMATION tzi;
-					const DWORD Result = ::GetTimeZoneInformation(&tzi);
-					switch (Result) {
-					case TIME_ZONE_ID_UNKNOWN:
-						Begin += tzi.Bias;
-						break;
-					case TIME_ZONE_ID_STANDARD:
-						Begin += tzi.Bias + tzi.StandardBias;
-						break;
-					case TIME_ZONE_ID_DAYLIGHT:
-						Begin += tzi.Bias + tzi.DaylightBias;
-						break;
-					}
-					if (Begin < 0)
-						Begin += 24 * 60;
-					fUTC = true;
-				}
-				break;
+			if (TimeMode == CEpgOptions::EpgTimeMode::JST || TimeMode == CEpgOptions::EpgTimeMode::UTC) {
+				if (TimeMode == CEpgOptions::EpgTimeMode::JST) {
+					TIME_ZONE_INFORMATION tziJST;
 
-			case CEpgOptions::EpgTimeMode::JST:
-				{
-					TIME_ZONE_INFORMATION tzi;
-
-					if (GetJSTTimeZoneInformation(&tzi)) {
+					if (GetJSTTimeZoneInformation(&tziJST)) {
 						SYSTEMTIME stUTC, stJST;
 
 						::GetSystemTime(&stUTC);
-						if (::SystemTimeToTzSpecificLocalTime(&tzi, &stUTC, &stJST)) {
-							Begin += static_cast<int>(DiffSystemTime(&stJST, &stUTC) / TimeConsts::SYSTEMTIME_MINUTE);
-							fUTC = true;
+						if (::SystemTimeToTzSpecificLocalTime(&tziJST, &stUTC, &stJST)) {
+							Begin -= static_cast<int>(DiffSystemTime(&stJST, &stUTC) / TimeConsts::SYSTEMTIME_MINUTE);
 						}
 					}
 				}
-				break;
 
-			case CEpgOptions::EpgTimeMode::UTC:
-				fUTC = true;
-				break;
+				TIME_ZONE_INFORMATION tzi;
+				const DWORD Result = ::GetTimeZoneInformation(&tzi);
+				switch (Result) {
+				case TIME_ZONE_ID_UNKNOWN:
+					Begin -= tzi.Bias;
+					break;
+				case TIME_ZONE_ID_STANDARD:
+					Begin -= tzi.Bias + tzi.StandardBias;
+					break;
+				case TIME_ZONE_ID_DAYLIGHT:
+					Begin -= tzi.Bias + tzi.DaylightBias;
+					break;
+				}
+				Begin = ((Begin % (24 * 60)) + (24 * 60)) % (24 * 60);
 			}
 
-			if (fUTC)
-				Begin += 9 * 60;
 			Begin = Begin / 60 % 24;
 
 			Offset = Day * 24 - First.Hour;
@@ -4892,7 +4876,7 @@ void CProgramGuide::ShowPopupMenu(int x, int y)
 		::GetMenuItemInfo(hmenuPopup, i, FALSE, &mii);
 		const int Length = ::lstrlen(szText);
 		StringFormat(
-			szText + Length, lengthof(szText) - Length, TEXT(" {}/{}({}) {}時～"),
+			szText + Length, lengthof(szText) - Length, TEXT(" {}/{}({}) {:02}:00 ~"),
 			Time.Month, Time.Day, GetDayOfWeekText(Time.DayOfWeek), Time.Hour);
 		::SetMenuItemInfo(hmenuPopup, i, FALSE, &mii);
 	}
@@ -5670,7 +5654,7 @@ public:
 			m_pProgramGuide->GetCurrentDateInfo(&Info);
 			EpgUtil::EpgTimeToDisplayTime(&Info.BeginningTime);
 			StringFormat(
-				szText, TEXT("{}{}{}/{}({}) {}時～"),
+				szText, TEXT("{}{}{}/{}({}) {:02}:00 ~"),
 				Info.pszRelativeDayText != nullptr ? Info.pszRelativeDayText : TEXT(""),
 				Info.pszRelativeDayText != nullptr ? TEXT(" ") : TEXT(""),
 				Info.BeginningTime.Month, Info.BeginningTime.Day,
@@ -5699,7 +5683,7 @@ public:
 					m_pProgramGuide->GetDateInfo(i, &Info);
 					EpgUtil::EpgTimeToDisplayTime(&Info.BeginningTime);
 					StringFormat(
-						szText, TEXT("{}{}{}/{}({}) {}時～"),
+						szText, TEXT("{}{}{}/{}({}) {:02}:00 ~"),
 						Info.pszRelativeDayText != nullptr ? Info.pszRelativeDayText : TEXT(""),
 						Info.pszRelativeDayText != nullptr ? TEXT(" ") : TEXT(""),
 						Info.BeginningTime.Month,

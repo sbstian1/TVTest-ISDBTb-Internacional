@@ -141,7 +141,7 @@ int FormatEventTime(
 		pszTime, MaxLength, TEXT("{}{}{}{}"),
 		szDate,
 		szStartTime,
-		!(Flags & FormatEventTimeFlag::StartOnly) ? TEXT("～") : TEXT(""),
+		!(Flags & FormatEventTimeFlag::StartOnly) ? TEXT(" - ") : TEXT(""),
 		szEndTime));
 }
 
