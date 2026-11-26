@@ -64,6 +64,7 @@ namespace TVTest
 		bool GetNoMonitorLowPower() const { return m_fNoMonitorLowPower; }
 		bool GetNoMonitorLowPowerActiveOnly() const { return m_fNoMonitorLowPowerActiveOnly; }
 		LPCTSTR GetLanguage() const { return m_Language.c_str(); }
+		void SetLanguage(LPCTSTR pszLanguage) { StringUtility::Assign(m_Language, pszLanguage); SetChanged(); }
 
 	private:
 	// CBasicDialog

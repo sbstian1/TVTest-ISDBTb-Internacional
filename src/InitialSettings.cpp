@@ -97,6 +97,45 @@ INT_PTR CInitialSettings::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				}
 			}
 
+			// Idioma / Language
+			{
+				m_OriginalTexts.clear();
+				TCHAR szText[512];
+				if (::GetWindowText(hDlg, szText, lengthof(szText)) > 0)
+					m_OriginalTexts.emplace_back(hDlg, szText);
+				::EnumChildWindows(
+					hDlg,
+					[](HWND hwndChild, LPARAM lParam) -> BOOL {
+						auto *pList = reinterpret_cast<std::vector<std::pair<HWND, String>>*>(lParam);
+						TCHAR szClass[32], szChildText[512];
+						if (::GetClassName(hwndChild, szClass, lengthof(szClass)) > 0
+								&& (::lstrcmpi(szClass, TEXT("Static")) == 0 || ::lstrcmpi(szClass, TEXT("Button")) == 0)
+								&& ::GetWindowText(hwndChild, szChildText, lengthof(szChildText)) > 0) {
+							pList->emplace_back(hwndChild, szChildText);
+						}
+						return TRUE;
+					},
+					reinterpret_cast<LPARAM>(&m_OriginalTexts));
+
+				const auto &LangMgr = GetAppClass().LanguageManager;
+				LPCTSTR pszCurLang = LangMgr.GetCurrentLanguage();
+				if (IsStringEmpty(pszCurLang))
+					pszCurLang = TEXT("es-ES");
+				int CurSel = 0;
+				for (int i = 0; i < LangMgr.GetLanguageCount(); i++) {
+					const auto *pInfo = LangMgr.GetLanguageInfo(i);
+					if (pInfo != nullptr) {
+						LRESULT Index = DlgComboBox_AddString(hDlg, IDC_INITIALSETTINGS_LANGUAGE, pInfo->Name.c_str());
+						DlgComboBox_SetItemData(hDlg, IDC_INITIALSETTINGS_LANGUAGE, Index, i);
+						if (::lstrcmpi(pInfo->Code.c_str(), pszCurLang) == 0) {
+							CurSel = static_cast<int>(Index);
+							m_Language = pInfo->Code;
+						}
+					}
+				}
+				DlgComboBox_SetCurSel(hDlg, IDC_INITIALSETTINGS_LANGUAGE, CurSel);
+			}
+
 			// BonDriver
 			{
 				int NormalDriverCount = 0;
@@ -166,6 +205,32 @@ INT_PTR CInitialSettings::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 	case WM_COMMAND:
 		switch (LOWORD(wParam)) {
+		case IDC_INITIALSETTINGS_LANGUAGE:
+			if (HIWORD(wParam) == CBN_SELCHANGE) {
+				const int Sel = static_cast<int>(DlgComboBox_GetCurSel(hDlg, IDC_INITIALSETTINGS_LANGUAGE));
+				if (Sel >= 0) {
+					const LRESULT LangIdx = DlgComboBox_GetItemData(hDlg, IDC_INITIALSETTINGS_LANGUAGE, Sel);
+					auto &LangMgr = GetAppClass().LanguageManager;
+					const auto *pInfo = LangMgr.GetLanguageInfo(static_cast<int>(LangIdx));
+					if (pInfo != nullptr && m_Language != pInfo->Code) {
+						m_Language = pInfo->Code;
+						for (const auto &Entry : m_OriginalTexts)
+							::SetWindowText(Entry.first, Entry.second.c_str());
+						LangMgr.LoadLanguage(m_Language.c_str());
+						LangMgr.TranslateDialog(hDlg);
+						for (int ID : {IDC_INITIALSETTINGS_MPEG2DECODER, IDC_INITIALSETTINGS_H264DECODER, IDC_INITIALSETTINGS_H265DECODER}) {
+							const int CurSel = static_cast<int>(DlgComboBox_GetCurSel(hDlg, ID));
+							const bool fHasDecoder = DlgComboBox_GetCount(hDlg, ID) > 1 || (DlgComboBox_GetCount(hDlg, ID) == 1 && CurSel != 0);
+							LPCTSTR pszFirstText = LangMgr.Translate(fHasDecoder ? TEXT("Automático") : TEXT("<No se encontraron decodificadores>"));
+							DlgComboBox_DeleteString(hDlg, ID, 0);
+							DlgComboBox_InsertString(hDlg, ID, 0, pszFirstText);
+							DlgComboBox_SetCurSel(hDlg, ID, CurSel);
+						}
+					}
+				}
+			}
+			return TRUE;
+
 		case IDC_INITIALSETTINGS_DRIVER_BROWSE:
 			{
 				OPENFILENAME ofn;
@@ -186,7 +251,7 @@ INT_PTR CInitialSettings::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				ofn.lpstrFile = szFileName;
 				ofn.nMaxFile = lengthof(szFileName);
 				ofn.lpstrInitialDir = InitDir.c_str();
-				ofn.lpstrTitle = TEXT("Seleccionar BonDriver");
+				ofn.lpstrTitle = GetAppClass().LanguageManager.Translate(TEXT("Seleccionar BonDriver"));
 				ofn.Flags = OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_EXPLORER;
 				if (FileOpenDialog(&ofn)) {
 					::SetDlgItemText(hDlg, IDC_INITIALSETTINGS_DRIVER, szFileName);
@@ -201,7 +266,7 @@ INT_PTR CInitialSettings::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				::GetDlgItemText(hDlg, IDC_INITIALSETTINGS_RECORDFOLDER, szFolder, lengthof(szFolder));
 				if (BrowseFolderDialog(
 							hDlg, szFolder,
-							TEXT("Carpeta para guardar grabaciones:")))
+							GetAppClass().LanguageManager.Translate(TEXT("Carpeta para guardar grabaciones:"))))
 					::SetDlgItemText(hDlg, IDC_INITIALSETTINGS_RECORDFOLDER, szFolder);
 			}
 			return TRUE;
@@ -232,12 +297,16 @@ INT_PTR CInitialSettings::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 							Codecs += TEXT("/");
 						Codecs += TEXT("H.265(HEVC)");
 					}
-					StringFormat(
-						&Message,
+					Message = GetAppClass().LanguageManager.Translate(
 						TEXT("No se encontró decodificador para {0}, por lo que no se podrá reproducir.\n")
-						TEXT("Para reproducir video, instale el decodificador correspondiente."),
-						Codecs);
-					::MessageBox(hDlg, Message.c_str(), TEXT("Información"), MB_OK | MB_ICONINFORMATION);
+						TEXT("Para reproducir video, instale el decodificador correspondiente."));
+					const size_t Pos = Message.find(TEXT("{0}"));
+					if (Pos != String::npos)
+						Message.replace(Pos, 3, Codecs);
+					::MessageBox(
+						hDlg, Message.c_str(),
+						GetAppClass().LanguageManager.Translate(TEXT("Información")),
+						MB_OK | MB_ICONINFORMATION);
 				}
 
 				String Mpeg2DecoderName, H264DecoderName, H265DecoderName;
@@ -275,7 +344,8 @@ INT_PTR CInitialSettings::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 								|| ::StrCmpNI(H264DecoderName.c_str(), e.pszDecoder, Length) == 0)
 							|| ::StrCmpNI(H265DecoderName.c_str(), e.pszDecoder, Length) == 0) {
 						if (::MessageBox(
-									hDlg, e.pszMessage, TEXT("Atención"),
+									hDlg, GetAppClass().LanguageManager.Translate(e.pszMessage),
+									GetAppClass().LanguageManager.Translate(TEXT("Atención")),
 									MB_YESNO | MB_ICONINFORMATION) == IDYES)
 							return TRUE;
 						break;
@@ -284,7 +354,8 @@ INT_PTR CInitialSettings::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 
 				if (!LibISDB::DirectShow::VideoRenderer::IsAvailable(VideoRenderer)) {
 					::MessageBox(
-						hDlg, TEXT("El renderizador seleccionado no está disponible en este sistema."),
+						hDlg,
+						GetAppClass().LanguageManager.Translate(TEXT("El renderizador seleccionado no está disponible en este sistema.")),
 						nullptr, MB_OK | MB_ICONEXCLAMATION);
 					return TRUE;
 				}
@@ -304,8 +375,9 @@ INT_PTR CInitialSettings::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lP
 				const CAppMain::CreateDirectoryResult CreateDirResult =
 					GetAppClass().CreateDirectory(
 						hDlg, szRecordFolder,
-						TEXT("録画ファイルの保存先フォルダ \"{}\" がありません。\n")
-						TEXT("¿Desea crearla?"));
+						GetAppClass().LanguageManager.Translate(
+							TEXT("No existe la carpeta de destino para grabaciones \"{}\".\n")
+							TEXT("¿Desea crearla?")));
 				if (CreateDirResult == CAppMain::CreateDirectoryResult::Error) {
 					SetDlgItemFocus(hDlg, IDC_INITIALSETTINGS_RECORDFOLDER);
 					return TRUE;
@@ -414,7 +486,7 @@ void CInitialSettings::InitDecoderList(int ID, const GUID &SubType, LPCTSTR pszD
 
 	DlgComboBox_InsertString(
 		m_hDlg, ID,
-		0, !FilterList.empty() || pszDefaultDecoderName != nullptr ? TEXT("Automático") : TEXT("<No se encontraron decodificadores>"));
+		0, GetAppClass().LanguageManager.Translate(!FilterList.empty() || pszDefaultDecoderName != nullptr ? TEXT("Automático") : TEXT("<No se encontraron decodificadores>")));
 	DlgComboBox_SetCurSel(m_hDlg, ID, Sel);
 }
 

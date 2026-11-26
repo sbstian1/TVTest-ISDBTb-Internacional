@@ -50,6 +50,7 @@ namespace TVTest
 		LPCTSTR GetH265DecoderName() const { return m_H265DecoderName.c_str(); }
 		LibISDB::DirectShow::VideoRenderer::RendererType GetVideoRenderer() const { return m_VideoRenderer; }
 		LPCTSTR GetRecordFolder() const { return m_RecordFolder.c_str(); }
+		LPCTSTR GetLanguage() const { return m_Language.c_str(); }
 
 	private:
 		const CDriverManager *m_pDriverManager;
@@ -59,6 +60,8 @@ namespace TVTest
 		String m_H265DecoderName;
 		LibISDB::DirectShow::VideoRenderer::RendererType m_VideoRenderer;
 		String m_RecordFolder;
+		String m_Language;
+		std::vector<std::pair<HWND, String>> m_OriginalTexts;
 		CAeroGlass m_AeroGlass;
 		Graphics::CImage m_LogoImage;
 		bool m_fDrawLogo = false;

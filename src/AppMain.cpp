@@ -827,6 +827,10 @@ int CAppMain::Main(HINSTANCE hInstance, LPCTSTR pszCmdLine, int nCmdShow)
 
 		if (!InitialSettings.Show(nullptr))
 			return 0;
+		if (!IsStringEmpty(InitialSettings.GetLanguage())) {
+			GeneralOptions.SetLanguage(InitialSettings.GetLanguage());
+			LanguageManager.LoadLanguage(GeneralOptions.GetLanguage());
+		}
 		DriverFileName = InitialSettings.GetDriverFileName();
 		GeneralOptions.SetDefaultDriverName(DriverFileName.c_str());
 		GeneralOptions.SetChanged();
