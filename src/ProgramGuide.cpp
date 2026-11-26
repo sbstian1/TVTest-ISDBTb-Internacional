@@ -1226,10 +1226,16 @@ bool CProgramGuide::UpdateProgramGuide()
 
 		ResetHitInfo(true);
 
-		if (m_pFrame != nullptr)
-			m_pFrame->SetCaption(TITLE_TEXT TEXT(" - Creando guía de programas..."));
+		if (m_pFrame != nullptr) {
+			TCHAR szCaption[128];
+			StringFormat(
+				szCaption, TEXT("{} - {}"),
+				GetAppClass().LanguageManager.Translate(TITLE_TEXT),
+				GetAppClass().LanguageManager.Translate(TEXT("Creando guía de programas...")));
+			m_pFrame->SetCaption(szCaption);
+		}
 
-		SetMessage(TEXT("Creando guía de programas..."));
+		SetMessage(GetAppClass().LanguageManager.Translate(TEXT("Creando guía de programas...")));
 
 		if (UpdateList()) {
 			CalcLayout();
@@ -2845,7 +2851,8 @@ void CProgramGuide::SetCaption()
 					Info.EndTime.OffsetHours(-1);
 					StringFormat(
 						szText,
-						TITLE_TEXT TEXT(" - {}{}{}/{}({}) {:02}:00 ~ {}/{}({}) {:02}:00"),
+						TEXT("{} - {}{}{}/{}({}) {:02}:00 ~ {}/{}({}) {:02}:00"),
+						GetAppClass().LanguageManager.Translate(TITLE_TEXT),
 						Info.pszRelativeDayText != nullptr ? Info.pszRelativeDayText : TEXT(""),
 						Info.pszRelativeDayText != nullptr ? TEXT(" ") : TEXT(""),
 						Info.BeginningTime.Month,
@@ -2861,7 +2868,8 @@ void CProgramGuide::SetCaption()
 					Last.OffsetDays(6);
 					StringFormat(
 						szText,
-						TITLE_TEXT TEXT(" - {} {}/{}({}) ~ {}/{}({})"),
+						TEXT("{} - {} {}/{}({}) ~ {}/{}({})"),
+						GetAppClass().LanguageManager.Translate(TITLE_TEXT),
 						m_ServiceList.GetItem(m_WeekListService)->GetServiceName(),
 						Info.BeginningTime.Month,
 						Info.BeginningTime.Day,
@@ -2873,7 +2881,7 @@ void CProgramGuide::SetCaption()
 				m_pFrame->SetCaption(szText);
 			}
 		} else {
-			m_pFrame->SetCaption(TITLE_TEXT);
+			m_pFrame->SetCaption(GetAppClass().LanguageManager.Translate(TITLE_TEXT));
 		}
 	}
 }
@@ -3984,7 +3992,7 @@ LPCTSTR CProgramGuide::GetRelativeDayText(int Day)
 
 	if (Day < 0 || Day >= lengthof(DayText))
 		return nullptr;
-	return DayText[Day];
+	return GetAppClass().LanguageManager.Translate(DayText[Day]);
 }
 
 
@@ -6607,7 +6615,7 @@ void CDateToolbar::OnCustomDraw(NMTBCUSTOMDRAW *pnmtb, HDC hdc)
 
 	TCHAR szText[32];
 	if ((pnmtb->nmcd.lItemlParam & ITEM_FLAG_NOW) != 0) {
-		StringCopy(szText, TEXT("Hoy"));
+		StringCopy(szText, GetAppClass().LanguageManager.Translate(TEXT("Hoy")));
 	} else {
 		StringFormat(
 			szText, TEXT("{}/{}({})"),
@@ -6818,7 +6826,7 @@ bool CTimeToolbar::SetButtons(const TimeInfo *pTimeList, int TimeListLength)
 
 		tbb.idCommand = TimeInfo.Command;
 		if (TimeInfo.Command == CM_PROGRAMGUIDE_TIME_CURRENT) {
-			StringCopy(szText, TEXT("Ahora"));
+			StringCopy(szText, GetAppClass().LanguageManager.Translate(TEXT("Ahora")));
 		} else {
 			StringFormat(szText, TEXT("{}:00 ~"), TimeInfo.Hour);
 		}
@@ -6898,7 +6906,7 @@ void CTimeToolbar::OnCustomDraw(NMTBCUSTOMDRAW *pnmtb, HDC hdc)
 
 	TCHAR szText[32];
 	if (fCurrent) {
-		StringCopy(szText, TEXT("Ahora"));
+		StringCopy(szText, GetAppClass().LanguageManager.Translate(TEXT("Ahora")));
 	} else {
 		StringFormat(szText, TEXT("{}:00 ~"), Hour);
 	}

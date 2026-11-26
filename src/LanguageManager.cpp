@@ -288,6 +288,22 @@ namespace TVTest
 				m_LanguageList.push_back(info);
 			}
 		}
+
+		std::stable_sort(
+			m_LanguageList.begin(), m_LanguageList.end(),
+			[](const LanguageInfo &a, const LanguageInfo &b) {
+				auto getOrder = [](const String &Code) -> int {
+					static const LPCTSTR Order[] = {
+						TEXT("es-ES"), TEXT("pt-BR"), TEXT("en-US"), TEXT("ja-JP")
+					};
+					for (int i = 0; i < 4; i++) {
+						if (_wcsicmp(Code.c_str(), Order[i]) == 0)
+							return i;
+					}
+					return 4;
+				};
+				return getOrder(a.Code) < getOrder(b.Code);
+			});
 	}
 
 	const CLanguageManager::LanguageInfo *CLanguageManager::GetLanguageInfo(int Index) const
