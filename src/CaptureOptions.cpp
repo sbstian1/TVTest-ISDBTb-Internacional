@@ -501,7 +501,7 @@ INT_PTR CCaptureOptions::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 				TEXT("Bicúbica"),
 			};
 			for (LPCTSTR pszText : ResizeInterpolationText)
-				DlgComboBox_AddString(hDlg, IDC_CAPTUREOPTIONS_RESIZEINTERPOLATION, pszText);
+				DlgComboBox_AddString(hDlg, IDC_CAPTUREOPTIONS_RESIZEINTERPOLATION, GetAppClass().LanguageManager.Translate(pszText));
 			DlgComboBox_SetCurSel(hDlg, IDC_CAPTUREOPTIONS_RESIZEINTERPOLATION, static_cast<int>(m_ResizeInterpolation));
 
 			LPCTSTR pszFormat;

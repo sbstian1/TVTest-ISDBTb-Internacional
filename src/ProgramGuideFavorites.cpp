@@ -114,7 +114,9 @@ void CProgramGuideFavorites::FavoriteInfo::SetDefaultColors()
 		Space |= SPACE_BS;
 	if (Label.find(TEXT("CS")) != String::npos)
 		Space |= SPACE_CS;
-	if (Label.find(TEXT("お気に入り")) != String::npos)
+	if (Label.find(TEXT("お気に入り")) != String::npos
+			|| Label.find(TEXT("Favoritos")) != String::npos
+			|| Label.find(TEXT("Favorites")) != String::npos)
 		Space |= SPACE_FAVORITES;
 
 	switch (Space) {

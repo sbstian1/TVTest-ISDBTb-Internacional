@@ -111,9 +111,9 @@ bool CMainDisplay::BuildViewer(BYTE VideoStreamType)
 		EnableViewer(false);
 
 	m_App.AddLog(
-		TEXT("DirectShowの初期化を行います({})..."),
+		TEXT("Inicializando DirectShow ({})..."),
 		VideoStreamType == LibISDB::STREAM_TYPE_INVALID ?
-			TEXT("映像なし") :
+			GetAppClass().LanguageManager.Translate(TEXT("Sin video")) :
 			LibISDB::GetStreamTypeText(VideoStreamType));
 
 	LibISDB::ViewerFilter *pViewer = m_App.CoreEngine.GetFilter<LibISDB::ViewerFilter>();
@@ -135,12 +135,12 @@ bool CMainDisplay::BuildViewer(BYTE VideoStreamType)
 	pViewer->SetAACDecoderType(m_App.AudioOptions.GetAACDecoder());
 
 	if (!m_App.CoreEngine.BuildMediaViewer(OpenSettings)) {
-		m_App.Core.OnError(&m_App.CoreEngine, TEXT("DirectShowの初期化ができません。"));
+		m_App.Core.OnError(&m_App.CoreEngine, GetAppClass().LanguageManager.Translate(TEXT("No se puede inicializar DirectShow.")));
 		return false;
 	}
 	m_App.AudioOptions.ApplyMediaViewerOptions();
 
-	m_App.AddLog(TEXT("DirectShowの初期化を行いました。"));
+	m_App.AddLog(GetAppClass().LanguageManager.Translate(TEXT("DirectShow inicializado.")));
 
 	return true;
 }

@@ -152,7 +152,7 @@ bool CEpg::CChannelProviderManager::CFavoritesChannelProvider::Update()
 {
 	ClearGroupList();
 	AddFavoritesChannels(GetAppClass().FavoritesManager.GetRootFolder(), String());
-	m_GroupList.front()->Name = TEXT("お気に入り");
+	m_GroupList.front()->Name = GetAppClass().LanguageManager.Translate(TEXT("Favoritos"));
 
 	const int NumSpaces = static_cast<int>(m_GroupList.size());
 	m_TuningSpaceList.Clear();
@@ -177,7 +177,7 @@ bool CEpg::CChannelProviderManager::CFavoritesChannelProvider::GetName(
 	if (pszName == nullptr || MaxName < 1)
 		return false;
 
-	StringCopy(pszName, TEXT("お気に入りチャンネル"), MaxName);
+	StringCopy(pszName, GetAppClass().LanguageManager.Translate(TEXT("Canales favoritos")), MaxName);
 
 	return true;
 }

@@ -217,7 +217,7 @@ bool BonDriverSourceFilter::LoadBonDriver(const String &FileName)
 		return false;
 	}
 
-	Log(Logger::LogType::Information, LIBISDB_STR("BonDriver \"{}\" を読み込みます..."), FileName);
+	Log(Logger::LogType::Information, LIBISDB_STR("Cargando BonDriver \"{}\"..."), FileName);
 
 	if (!m_BonDriver.Load(FileName)) {
 		const DWORD ErrorCode = ::GetLastError();
@@ -255,7 +255,7 @@ bool BonDriverSourceFilter::LoadBonDriver(const String &FileName)
 		return false;
 	}
 
-	Log(Logger::LogType::Information, LIBISDB_STR("BonDriver を読み込みました。"));
+	Log(Logger::LogType::Information, LIBISDB_STR("BonDriver cargado."));
 
 	ResetError();
 
@@ -268,9 +268,9 @@ bool BonDriverSourceFilter::UnloadBonDriver()
 	if (m_BonDriver.IsLoaded()) {
 		CloseTuner();
 
-		Log(Logger::LogType::Information, LIBISDB_STR("BonDriver を解放します..."));
+		Log(Logger::LogType::Information, LIBISDB_STR("Liberando BonDriver..."));
 		m_BonDriver.Unload();
-		Log(Logger::LogType::Information, LIBISDB_STR("BonDriver を解放しました。"));
+		Log(Logger::LogType::Information, LIBISDB_STR("BonDriver liberado."));
 	}
 
 	return true;
@@ -296,7 +296,7 @@ bool BonDriverSourceFilter::OpenTuner()
 		return false;
 	}
 
-	Log(Logger::LogType::Information, LIBISDB_STR("チューナを開いています..."));
+	Log(Logger::LogType::Information, LIBISDB_STR("Abriendo sintonizador..."));
 
 	if (!m_BonDriver.CreateIBonDriver()) {
 		SetError(ErrorCode::CreateBonDriverFailed, LIBISDB_STR("IBonDriver を作成できません。"));
@@ -317,8 +317,8 @@ bool BonDriverSourceFilter::OpenTuner()
 		if (!TunerOpened) {
 			SetError(
 				ErrorCode::TunerOpenFailed,
-				LIBISDB_STR("チューナを開けません。"),
-				LIBISDB_STR("BonDriver にチューナを開くよう要求しましたがエラーが返されました。"));
+				LIBISDB_STR("No se puede abrir el sintonizador."),
+				LIBISDB_STR("Se solicitó a BonDriver abrir el sintonizador, pero devolvió un error."));
 			throw ErrorCode::TunerOpenFailed;
 		}
 
@@ -338,7 +338,7 @@ bool BonDriverSourceFilter::OpenTuner()
 		return false;
 	}
 
-	Log(Logger::LogType::Information, LIBISDB_STR("チューナを開きました。"));
+	Log(Logger::LogType::Information, LIBISDB_STR("Sintonizador abierto."));
 
 	ResetError();
 
@@ -370,7 +370,7 @@ bool BonDriverSourceFilter::CloseTuner()
 
 	if (m_BonDriver.IsIBonDriverCreated()) {
 		// チューナを閉じる
-		Log(Logger::LogType::Information, LIBISDB_STR("チューナを閉じています..."));
+		Log(Logger::LogType::Information, LIBISDB_STR("Cerrando sintonizador..."));
 		m_BonDriver.CloseTuner();
 
 		// ドライバインスタンス開放

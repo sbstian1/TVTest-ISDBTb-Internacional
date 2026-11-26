@@ -1732,7 +1732,7 @@ void CUICore::OnLog(LibISDB::Logger::LogType Type, LPCTSTR pszOutput)
 	}
 
 	if (m_fStatusBarTrace && LogType == CLogItem::LogType::Information)
-		m_App.StatusView.SetSingleText(pszOutput);
+		m_App.StatusView.SetSingleText(GetAppClass().LanguageManager.Translate(pszOutput));
 	else
 		m_App.Logger.AddLogRaw(LogType, pszOutput);
 }
