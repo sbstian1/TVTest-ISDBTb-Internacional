@@ -46,6 +46,25 @@ VideoRenderer_MPCVideoRenderer::VideoRenderer_MPCVideoRenderer()
 }
 
 
+bool VideoRenderer_MPCVideoRenderer::InitializeBeforeConnect(HWND hwndRender)
+{
+	COMPointer<IVideoWindow> VideoWindow;
+	const HRESULT hr = m_Renderer->QueryInterface(IID_PPV_ARGS(VideoWindow.GetPP()));
+	if (FAILED(hr)) {
+		SetHRESULTError(hr, LIBISDB_STR("No se pudo obtener IVideoWindow de MPC Video Renderer."));
+		return false;
+	}
+
+	const HRESULT OwnerResult = VideoWindow->put_Owner(reinterpret_cast<OAHWND>(hwndRender));
+	if (FAILED(OwnerResult)) {
+		SetHRESULTError(OwnerResult, LIBISDB_STR("No se pudo establecer la ventana de visualización de MPC Video Renderer."));
+		return false;
+	}
+
+	return true;
+}
+
+
 bool VideoRenderer_MPCVideoRenderer::Initialize(
 	IGraphBuilder *pGraphBuilder, IPin *pInputPin, HWND hwndRender, HWND hwndMessageDrain)
 {

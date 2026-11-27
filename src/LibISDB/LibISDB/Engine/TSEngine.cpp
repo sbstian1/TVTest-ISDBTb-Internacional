@@ -374,6 +374,9 @@ bool TSEngine::SelectService(uint16_t ServiceID, bool No1Seg)
 	m_FilterGraph.WalkGraph(
 		[ServiceID](FilterBase *pFilter) { pFilter->SetActiveServiceID(ServiceID); });
 
+	if (ServiceChanged)
+		OnServiceChanged(ServiceID);
+
 	SetPCRPID(m_pAnalyzer->GetPCRPID(CurServiceIndex), ServiceChanged);
 	SetVideoPID(VideoPID, true);
 	SetAudioPID(AudioPID, true);
@@ -383,8 +386,6 @@ bool TSEngine::SelectService(uint16_t ServiceID, bool No1Seg)
 		SetWriteStream(ServiceID, m_WriteStream);
 #endif
 
-	if (ServiceChanged)
-		OnServiceChanged(ServiceID);
 
 	const uint16_t EventID = m_pAnalyzer->GetEventID(CurServiceIndex);
 	if (ServiceChanged || (m_CurEventID != EventID)) {

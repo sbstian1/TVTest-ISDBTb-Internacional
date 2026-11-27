@@ -300,6 +300,11 @@ bool VideoRenderer_Basic::Initialize(
 		return false;
 	}
 
+	if (!InitializeBeforeConnect(hwndRender)) {
+		m_Renderer.Release();
+		return false;
+	}
+
 	IFilterGraph2 *pFilterGraph2;
 	hr = pGraphBuilder->QueryInterface(IID_PPV_ARGS(&pFilterGraph2));
 	if (FAILED(hr)) {
