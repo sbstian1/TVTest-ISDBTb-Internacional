@@ -1092,10 +1092,10 @@ int CAppMain::Main(HINSTANCE hInstance, LPCTSTR pszCmdLine, int nCmdShow)
 		}
 	}
 
-	StatusView.SetSingleText(TEXT("Cargando configuración de canales..."));
+	StatusView.SetSingleText(LanguageManager.Translate(TEXT("Cargando configuración de canales...")));
 	Core.InitializeChannel();
 
-	StatusView.SetSingleText(TEXT("ロゴを読み込んでいます..."));
+	StatusView.SetSingleText(LanguageManager.Translate(TEXT("Cargando logos...")));
 	EpgOptions.LoadLogoFile();
 
 	{
@@ -1104,7 +1104,7 @@ int CAppMain::Main(HINSTANCE hInstance, LPCTSTR pszCmdLine, int nCmdShow)
 		GetAppDirectory(szDRCSMapName);
 		::PathAppend(szDRCSMapName, TEXT("DRCSMap.ini"));
 		if (::PathFileExists(szDRCSMapName)) {
-			StatusView.SetSingleText(TEXT("DRCSマップを読み込んでいます..."));
+			StatusView.SetSingleText(LanguageManager.Translate(TEXT("Cargando mapa DRCS...")));
 			Panel.CaptionPanel.LoadDRCSMap(szDRCSMapName);
 		}
 	}
@@ -1115,7 +1115,7 @@ int CAppMain::Main(HINSTANCE hInstance, LPCTSTR pszCmdLine, int nCmdShow)
 		::GetModuleFileName(nullptr, szSearchFileName, lengthof(szSearchFileName));
 		::PathRenameExtension(szSearchFileName, TEXT(".search.ini"));
 		if (::PathFileExists(szSearchFileName)) {
-			StatusView.SetSingleText(TEXT("キーワード検索設定を読み込んでいます..."));
+			StatusView.SetSingleText(LanguageManager.Translate(TEXT("Cargando búsqueda por palabras clave...")));
 			KeywordSearch.Load(szSearchFileName);
 		}
 	}
@@ -1157,9 +1157,10 @@ int CAppMain::Main(HINSTANCE hInstance, LPCTSTR pszCmdLine, int nCmdShow)
 		} else if (m_fFirstExecute
 				&& ChannelManager.GetFileAllChannelList()->NumChannels() == 0) {
 			if (MainWindow.ShowMessage(
-						TEXT("最初にチャンネルスキャンを行うことをおすすめします。\r\n")
-						TEXT("今すぐチャンネルスキャンを行いますか?"),
-						TEXT("チャンネルスキャンの確認"),
+						LanguageManager.Translate(
+							TEXT("Se recomienda realizar un escaneo de canales primero.\r\n")
+							TEXT("¿Desea realizar el escaneo de canales ahora?")),
+						LanguageManager.Translate(TEXT("Confirmación de escaneo de canales")),
 						MB_YESNO | MB_ICONINFORMATION) == IDYES) {
 				ShowOptionDialog(MainWindow.GetHandle(), COptionDialog::PAGE_CHANNELSCAN);
 			}

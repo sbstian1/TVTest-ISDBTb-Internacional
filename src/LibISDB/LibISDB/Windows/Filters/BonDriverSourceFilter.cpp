@@ -353,7 +353,7 @@ bool BonDriverSourceFilter::CloseTuner()
 
 	if (IsStarted()) {
 		// ストリーム受信スレッド停止
-		Log(Logger::LogType::Information, LIBISDB_STR("ストリーム受信スレッドを停止しています..."));
+		Log(Logger::LogType::Information, LIBISDB_STR("Deteniendo hilo de recepción de stream..."));
 		StreamingRequest Request;
 		Request.Type = StreamingRequest::RequestType::End;
 		AddRequest(Request);
@@ -374,9 +374,9 @@ bool BonDriverSourceFilter::CloseTuner()
 		m_BonDriver.CloseTuner();
 
 		// ドライバインスタンス開放
-		Log(Logger::LogType::Information, LIBISDB_STR("BonDriver インターフェースを解放しています..."));
+		Log(Logger::LogType::Information, LIBISDB_STR("Liberando interfaz BonDriver..."));
 		m_BonDriver.ReleaseIBonDriver();
-		Log(Logger::LogType::Information, LIBISDB_STR("BonDriver インターフェースを解放しました。"));
+		Log(Logger::LogType::Information, LIBISDB_STR("Interfaz BonDriver liberada."));
 	}
 
 	ResetStatus();

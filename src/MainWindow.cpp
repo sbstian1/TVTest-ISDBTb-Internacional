@@ -3189,11 +3189,12 @@ bool CMainWindow::OnInitMenuPopup(HMENU hmenu)
 					} else if (Info.IsDualMono()) {
 						Length = StringVFormat(
 							pszText, MaxText,
-							Info.DualMono == CAudioManager::DualMonoMode::Main ?
-								TEXT("主音声") :
-							Info.DualMono == CAudioManager::DualMonoMode::Sub ?
-								TEXT("副音声") :
-								TEXT("主+副音声"));
+							GetAppClass().LanguageManager.Translate(
+								Info.DualMono == CAudioManager::DualMonoMode::Main ?
+									TEXT("Audio principal") :
+								Info.DualMono == CAudioManager::DualMonoMode::Sub ?
+									TEXT("Audio secundario") :
+									TEXT("Audio principal + secundario")));
 					} else {
 						Length = StringFormat(pszText, MaxText, TEXT("Audio {}"), StreamNumber + 1);
 					}

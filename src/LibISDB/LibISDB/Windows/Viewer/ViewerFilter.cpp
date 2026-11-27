@@ -407,7 +407,7 @@ bool ViewerFilter::OpenViewer(const OpenSettings &Settings)
 
 		m_EventListenerList.CallEventListener(&ViewerFilter::EventListener::OnFilterGraphInitialize, this, m_GraphBuilder.Get());
 
-		Log(Logger::LogType::Information, LIBISDB_STR("ソースフィルタの接続中..."));
+		Log(Logger::LogType::Information, LIBISDB_STR("Conectando filtro de origen..."));
 
 		// TSSourceFilter
 		{
@@ -432,7 +432,7 @@ bool ViewerFilter::OpenViewer(const OpenSettings &Settings)
 			m_SourceFilter->SetPCRPID(m_PCRPID);
 		}
 
-		Log(Logger::LogType::Information, LIBISDB_STR("MPEG-2 Demultiplexerフィルタの接続中..."));
+		Log(Logger::LogType::Information, LIBISDB_STR("Conectando filtro MPEG-2 Demultiplexer..."));
 
 		// MPEG-2 Demultiplexer
 		{
@@ -506,7 +506,7 @@ bool ViewerFilter::OpenViewer(const OpenSettings &Settings)
 		switch (Settings.VideoStreamType) {
 		case STREAM_TYPE_MPEG2_VIDEO:
 			{
-				Log(Logger::LogType::Information, LIBISDB_STR("MPEG-2パーサフィルタの接続中..."));
+				Log(Logger::LogType::Information, LIBISDB_STR("Conectando filtro analizador MPEG-2..."));
 
 				// インスタンス作成
 				DirectShow::MPEG2ParserFilter *pMPEG2Parser =
@@ -525,7 +525,7 @@ bool ViewerFilter::OpenViewer(const OpenSettings &Settings)
 
 		case STREAM_TYPE_H264:
 			{
-				Log(Logger::LogType::Information, LIBISDB_STR("H.264パーサフィルタの接続中..."));
+				Log(Logger::LogType::Information, LIBISDB_STR("Conectando filtro analizador H.264..."));
 
 				// インスタンス作成
 				DirectShow::H264ParserFilter *pH264Parser =
@@ -544,7 +544,7 @@ bool ViewerFilter::OpenViewer(const OpenSettings &Settings)
 
 		case STREAM_TYPE_H265:
 			{
-				Log(Logger::LogType::Information, LIBISDB_STR("H.265パーサフィルタの接続中..."));
+				Log(Logger::LogType::Information, LIBISDB_STR("Conectando filtro analizador H.265..."));
 
 				// インスタンス作成
 				DirectShow::H265ParserFilter *pH265Parser =
@@ -562,7 +562,7 @@ bool ViewerFilter::OpenViewer(const OpenSettings &Settings)
 			break;
 		}
 
-		Log(Logger::LogType::Information, LIBISDB_STR("音声デコーダの接続中..."));
+		Log(Logger::LogType::Information, LIBISDB_STR("Conectando decodificador de audio..."));
 
 		// AudioDecoderFilter
 		{
@@ -586,7 +586,7 @@ bool ViewerFilter::OpenViewer(const OpenSettings &Settings)
 
 		// 音声フィルタの接続
 		if (!Settings.AudioFilterList.empty()) {
-			Log(Logger::LogType::Information, LIBISDB_STR("音声フィルタの接続中..."));
+			Log(Logger::LogType::Information, LIBISDB_STR("Conectando filtro de audio..."));
 
 			DirectShow::DeviceEnumerator DevEnum;
 			DirectShow::FilterInfoList FilterList;
@@ -665,7 +665,7 @@ bool ViewerFilter::OpenViewer(const OpenSettings &Settings)
 		}
 
 		if (!NoVideo) {
-			Log(Logger::LogType::Information, LIBISDB_STR("映像レンダラの構築中..."));
+			Log(Logger::LogType::Information, LIBISDB_STR("Construyendo renderizador de video..."));
 
 			m_VideoRenderer.reset(DirectShow::VideoRenderer::CreateRenderer(Settings.VideoRenderer));
 			if (!m_VideoRenderer) {
@@ -682,7 +682,7 @@ bool ViewerFilter::OpenViewer(const OpenSettings &Settings)
 			m_VideoRendererType = Settings.VideoRenderer;
 		}
 
-		Log(Logger::LogType::Information, LIBISDB_STR("音声レンダラの構築中..."));
+		Log(Logger::LogType::Information, LIBISDB_STR("Construyendo renderizador de audio..."));
 
 		// 音声レンダラ構築
 		{
@@ -840,14 +840,14 @@ void ViewerFilter::CloseViewer()
 	Lock.TryLock(LOCK_TIMEOUT);
 
 	if (m_GraphBuilder) {
-		Log(Logger::LogType::Information, LIBISDB_STR("フィルタグラフを停止しています..."));
+		Log(Logger::LogType::Information, LIBISDB_STR("Deteniendo grafo de filtros..."));
 		m_GraphBuilder->Abort();
 		Stop();
 
 		m_EventListenerList.CallEventListener(&ViewerFilter::EventListener::OnFilterGraphFinalize, this, m_GraphBuilder.Get());
 	}
 
-	Log(Logger::LogType::Information, LIBISDB_STR("COMインスタンスを解放しています..."));
+	Log(Logger::LogType::Information, LIBISDB_STR("Liberando instancias COM..."));
 
 	// COMインスタンスを開放する
 
@@ -872,7 +872,7 @@ void ViewerFilter::CloseViewer()
 	m_MapAudioPID = PID_INVALID;
 
 	if (m_GraphBuilder) {
-		Log(Logger::LogType::Information, LIBISDB_STR("フィルタグラフを解放しています..."));
+		Log(Logger::LogType::Information, LIBISDB_STR("Liberando grafo de filtros..."));
 		m_EventListenerList.CallEventListener(&ViewerFilter::EventListener::OnFilterGraphFinalized, this, m_GraphBuilder.Get());
 		DestroyGraphBuilder();
 	}
@@ -1998,7 +1998,7 @@ bool ViewerFilter::SetPacketInputWait(DWORD Wait)
 void ViewerFilter::ConnectVideoDecoder(
 	LPCTSTR pszCodecName, const GUID &MediaSubType, LPCTSTR pszDecoderName, COMPointer<IPin> *pOutputPin)
 {
-	Log(Logger::LogType::Information, LIBISDB_STR("{} デコーダの接続中..."), pszCodecName);
+	Log(Logger::LogType::Information, LIBISDB_STR("Conectando decodificador {}..."), pszCodecName);
 
 	const bool Default = StringIsEmpty(pszDecoderName);
 	bool ConnectSuccess = false;

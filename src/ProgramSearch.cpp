@@ -2146,7 +2146,7 @@ INT_PTR CProgramSearchDialog::DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARA
 				NMLVEMPTYMARKUP *pnmMarkup = reinterpret_cast<NMLVEMPTYMARKUP*>(lParam);
 
 				pnmMarkup->dwFlags = EMF_CENTERED;
-				StringCopy(pnmMarkup->szMarkup, L"検索された番組はありません");
+				StringCopy(pnmMarkup->szMarkup, GetAppClass().LanguageManager.Translate(TEXT("No se encontraron programas")));
 				::SetWindowLongPtr(hDlg, DWLP_MSGRESULT, TRUE);
 			}
 			return TRUE;
