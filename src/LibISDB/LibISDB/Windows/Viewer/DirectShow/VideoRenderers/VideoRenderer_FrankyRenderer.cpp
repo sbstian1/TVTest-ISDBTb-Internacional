@@ -46,6 +46,25 @@ VideoRenderer_FrankyRenderer::VideoRenderer_FrankyRenderer()
 }
 
 
+bool VideoRenderer_FrankyRenderer::InitializeBeforeConnect(HWND hwndRender)
+{
+	COMPointer<IVideoWindow> VideoWindow;
+	const HRESULT hr = m_Renderer->QueryInterface(IID_PPV_ARGS(VideoWindow.GetPP()));
+	if (FAILED(hr)) {
+		SetHRESULTError(hr, LIBISDB_STR("No se pudo obtener IVideoWindow de FrankyRenderer."));
+		return false;
+	}
+
+	const HRESULT OwnerResult = VideoWindow->put_Owner(reinterpret_cast<OAHWND>(hwndRender));
+	if (FAILED(OwnerResult)) {
+		SetHRESULTError(OwnerResult, LIBISDB_STR("No se pudo establecer la ventana de visualización de FrankyRenderer."));
+		return false;
+	}
+
+	return true;
+}
+
+
 bool VideoRenderer_FrankyRenderer::Initialize(
 	IGraphBuilder *pGraphBuilder, IPin *pInputPin, HWND hwndRender, HWND hwndMessageDrain)
 {
@@ -236,10 +255,12 @@ LRESULT CALLBACK VideoRenderer_FrankyRenderer::VideoWndProc(HWND hwnd, UINT uMsg
 	case WM_NCMBUTTONDOWN:
 	case WM_NCMBUTTONUP:
 	case WM_NCMOUSEMOVE:
+	case WM_MOUSEWHEEL:
+	case WM_MOUSEHWHEEL:
 		{
 			VideoRenderer_FrankyRenderer *pThis = GetThis(hwnd);
 
-			if (pThis->m_hwndMessageDrain) {
+			if (pThis != nullptr && pThis->m_hwndMessageDrain != nullptr) {
 				::PostMessage(pThis->m_hwndMessageDrain, uMsg, wParam, lParam);
 				return 0;
 			}
@@ -259,7 +280,7 @@ LRESULT CALLBACK VideoRenderer_FrankyRenderer::VideoWndProc(HWND hwnd, UINT uMsg
 		{
 			VideoRenderer_FrankyRenderer *pThis = GetThis(hwnd);
 
-			if (pThis->m_hwndMessageDrain) {
+			if (pThis != nullptr && pThis->m_hwndMessageDrain != nullptr) {
 				POINT pt = {GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)};
 
 				::MapWindowPoints(hwnd, pThis->m_hwndMessageDrain, &pt, 1);
@@ -273,8 +294,10 @@ LRESULT CALLBACK VideoRenderer_FrankyRenderer::VideoWndProc(HWND hwnd, UINT uMsg
 		if (LOWORD(lParam) == HTCLIENT) {
 			VideoRenderer_FrankyRenderer *pThis = GetThis(hwnd);
 
-			::SetCursor(pThis->m_ShowCursor ? ::LoadCursor(nullptr, IDC_ARROW) : nullptr);
-			return TRUE;
+			if (pThis != nullptr) {
+				::SetCursor(pThis->m_ShowCursor ? ::LoadCursor(nullptr, IDC_ARROW) : nullptr);
+				return TRUE;
+			}
 		}
 		break;
 
@@ -282,7 +305,8 @@ LRESULT CALLBACK VideoRenderer_FrankyRenderer::VideoWndProc(HWND hwnd, UINT uMsg
 		{
 			VideoRenderer_FrankyRenderer *pThis = GetThis(hwnd);
 
-			pThis->m_hwndVideo = nullptr;
+			if (pThis != nullptr)
+				pThis->m_hwndVideo = nullptr;
 		}
 		return 0;
 	}

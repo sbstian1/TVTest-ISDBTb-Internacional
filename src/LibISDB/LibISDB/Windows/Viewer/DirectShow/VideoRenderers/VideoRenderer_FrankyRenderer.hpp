@@ -56,6 +56,8 @@ namespace LibISDB::DirectShow
 		static const CLSID & GetCLSID();
 
 	private:
+		bool InitializeBeforeConnect(HWND hwndRender) override;
+
 		static VideoRenderer_FrankyRenderer * GetThis(HWND hwnd);
 		static LRESULT CALLBACK VideoWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 
