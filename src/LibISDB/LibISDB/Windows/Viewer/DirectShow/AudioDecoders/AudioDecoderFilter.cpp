@@ -1463,13 +1463,6 @@ AudioDecoder * AudioDecoderFilter::CreateDecoder(DecoderType Type)
 			pDecoder->SetLATMMode(true);
 			return pDecoder;
 		}
-#else
-	case DecoderType::AAC_LATM:
-		{
-			auto *pDecoder = new AACDecoder_FAAD2;
-			pDecoder->SetLATMMode(true);
-			return pDecoder;
-		}
 #endif
 
 	}
@@ -1498,6 +1491,7 @@ bool AudioDecoderFilter::GetDecoderVersion(DecoderType Type, std::string *pVersi
 
 #ifdef LIBISDB_HAS_FDK_AAC
 	case DecoderType::FDK_AAC:
+	case DecoderType::AAC_LATM:
 		AACDecoder_FDK::GetVersion(pVersion);
 		return true;
 #endif

@@ -91,7 +91,8 @@ bool AACDecoder::Decode(const uint8_t *pData, size_t *pDataSize, ReturnArg<Decod
 			m_DecodeError = true;
 			return false;
 		}
-		m_DecodeError = false;
+		if (Info->SampleCount > 0)
+			m_DecodeError = false;
 		return true;
 	}
 

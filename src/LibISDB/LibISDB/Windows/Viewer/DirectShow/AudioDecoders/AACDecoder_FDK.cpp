@@ -32,6 +32,8 @@
 
 #include "AACDecoder_FDK.hpp"
 #include "../../../../../Thirdparty/fdk-aac/libAACdec/include/aacdecoder_lib.h"
+#include <algorithm>
+#include <cmath>
 #include "../../../../Base/DebugDef.hpp"
 
 
@@ -380,16 +382,59 @@ bool AACDecoder_FDK::DecodeStream(const uint8_t *pData, size_t *pDataSize, Retur
 
 			// If stream has 3/4/5/7/8 channels (which AudioDecoderFilter doesn't map directly),
 			// ask FDK-AAC to downmix subsequent frames to 2 channels using ABNT NBR 15602-2 profile,
-			// and compact the current frame to 2 channels so no audio frame is lost.
+			// and downmix the current transition frame to 2 channels so no channels or frames are lost.
 			if (OutChannels != 1 && OutChannels != 2 && OutChannels != 6) {
 				::aacDecoder_SetParam(m_hDecoder, AAC_PCM_MAX_OUTPUT_CHANNELS, 2);
 				int16_t *pPCM = reinterpret_cast<int16_t *>(m_PCMBuffer.GetBuffer());
 				const int FrameSize = pStreamInfo->frameSize;
+				int FrontCount = 0;
+				int BackCount = 0;
+				if (pStreamInfo->pChannelType != nullptr) {
+					for (int ch = 0; ch < OutChannels; ++ch) {
+						if (pStreamInfo->pChannelType[ch] == ACT_FRONT)
+							++FrontCount;
+						else if (pStreamInfo->pChannelType[ch] == ACT_BACK)
+							++BackCount;
+					}
+				}
+				constexpr double PSQR = 0.7071067811865475;
 				for (int i = 0; i < FrameSize; ++i) {
-					const int16_t L = pPCM[i * OutChannels + 0];
-					const int16_t R = (OutChannels >= 2) ? pPCM[i * OutChannels + 1] : L;
-					pPCM[i * 2 + 0] = L;
-					pPCM[i * 2 + 1] = R;
+					double L = 0.0;
+					double R = 0.0;
+					if (pStreamInfo->pChannelType != nullptr && pStreamInfo->pChannelIndices != nullptr) {
+						for (int ch = 0; ch < OutChannels; ++ch) {
+							const double Sample = static_cast<double>(pPCM[i * OutChannels + ch]);
+							const AUDIO_CHANNEL_TYPE Type = pStreamInfo->pChannelType[ch];
+							const UCHAR Idx = pStreamInfo->pChannelIndices[ch];
+							if (Type == ACT_FRONT) {
+								if (FrontCount == 1) {
+									L += Sample;
+									R += Sample;
+								} else if (FrontCount == 3 && Idx == 0) {
+									L += Sample * PSQR;
+									R += Sample * PSQR;
+								} else if ((FrontCount == 3 && Idx == 1) || (FrontCount == 2 && Idx == 0)) {
+									L += Sample;
+								} else {
+									R += Sample;
+								}
+							} else if (Type == ACT_SIDE || Type == ACT_BACK) {
+								if (Type == ACT_BACK && BackCount == 1) {
+									L += Sample * PSQR;
+									R += Sample * PSQR;
+								} else if ((Idx & 1) == 0) {
+									L += Sample * PSQR;
+								} else {
+									R += Sample * PSQR;
+								}
+							}
+						}
+					} else {
+						L = static_cast<double>(pPCM[i * OutChannels + 0]);
+						R = (OutChannels >= 2) ? static_cast<double>(pPCM[i * OutChannels + 1]) : L;
+					}
+					pPCM[i * 2 + 0] = static_cast<int16_t>(std::clamp(static_cast<int>(std::lround(L)), -32768, 32767));
+					pPCM[i * 2 + 1] = static_cast<int16_t>(std::clamp(static_cast<int>(std::lround(R)), -32768, 32767));
 				}
 				OutChannels = 2;
 			}
@@ -417,6 +462,7 @@ bool AACDecoder_FDK::DecodeStream(const uint8_t *pData, size_t *pDataSize, Retur
 
 		if (Err == AAC_DEC_TRANSPORT_SYNC_ERROR || IS_DECODE_ERROR(Err)) {
 			++m_SyncErrorCount;
+			m_DecodeError = true;
 			// Only retry if the internal bitstream buffer actually advanced
 			if (FreeBytesAfter > FreeBytesBefore) {
 				continue;
