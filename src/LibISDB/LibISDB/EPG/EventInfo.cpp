@@ -27,6 +27,7 @@
 #include "../LibISDBPrivate.hpp"
 #include "EventInfo.hpp"
 #include "../Utilities/Sort.hpp"
+#include <atomic>
 #include "../Base/DebugDef.hpp"
 
 
@@ -60,6 +61,8 @@ bool EventInfo::IsEqual(const EventInfo &Op) const noexcept
 		&& (VideoList == Op.VideoList)
 		&& (AudioList == Op.AudioList)
 		&& (ContentNibble == Op.ContentNibble)
+		&& (ParentalRating == Op.ParentalRating)
+		&& (ParentalRatingCountryCode == Op.ParentalRatingCountryCode)
 		&& (EventGroupList == Op.EventGroupList)
 		&& (IsCommonEvent == Op.IsCommonEvent)
 		&& ((!IsCommonEvent || (CommonEvent == Op.CommonEvent)));
@@ -265,7 +268,38 @@ const EventInfo::AudioInfo * EventInfo::GetMainAudioInfo() const
 
 
 
-// EPGの日時(ローカル日時)からUTCに変換する
+namespace
+{
+	std::atomic<int> g_BroadcastTimeOffsetMinutes{INT_MIN};
+}
+
+
+void SetBroadcastTimeOffsetMinutes(int OffsetMinutes) noexcept
+{
+	// Valid UTC offsets are within [-12h, +14h]
+	if (OffsetMinutes >= -12 * 60 && OffsetMinutes <= 14 * 60)
+		g_BroadcastTimeOffsetMinutes.store(OffsetMinutes, std::memory_order_relaxed);
+}
+
+
+void ClearBroadcastTimeOffset() noexcept
+{
+	g_BroadcastTimeOffsetMinutes.store(INT_MIN, std::memory_order_relaxed);
+}
+
+
+bool GetBroadcastTimeOffsetMinutes(ReturnArg<int> OffsetMinutes) noexcept
+{
+	const int Value = g_BroadcastTimeOffsetMinutes.load(std::memory_order_relaxed);
+	if (Value == INT_MIN)
+		return false;
+	if (OffsetMinutes)
+		OffsetMinutes = Value;
+	return true;
+}
+
+
+// EPGの日時(TOTオフセットまたはローカル日時)からUTCに変換する
 bool EPGTimeToUTCTime(const DateTime &EPGTime, ReturnArg<DateTime> UTCTime)
 {
 	if (!UTCTime)
@@ -273,8 +307,13 @@ bool EPGTimeToUTCTime(const DateTime &EPGTime, ReturnArg<DateTime> UTCTime)
 
 	UTCTime = EPGTime;
 
-	if (UTCTime->ToUTC())
+	int OffsetMinutes = 0;
+	if (GetBroadcastTimeOffsetMinutes(&OffsetMinutes)) {
+		if (UTCTime->OffsetSeconds(-OffsetMinutes * 60))
+			return true;
+	} else if (UTCTime->ToUTC()) {
 		return true;
+	}
 
 	UTCTime->Reset();
 
@@ -282,7 +321,7 @@ bool EPGTimeToUTCTime(const DateTime &EPGTime, ReturnArg<DateTime> UTCTime)
 }
 
 
-// UTCからEPGの日時(ローカル日時)に変換する
+// UTCからEPGの日時(TOTオフセットまたはローカル日時)に変換する
 bool UTCTimeToEPGTime(const DateTime &UTCTime, ReturnArg<DateTime> EPGTime)
 {
 	if (!EPGTime)
@@ -290,8 +329,13 @@ bool UTCTimeToEPGTime(const DateTime &UTCTime, ReturnArg<DateTime> EPGTime)
 
 	EPGTime = UTCTime;
 
-	if (EPGTime->ToLocal())
+	int OffsetMinutes = 0;
+	if (GetBroadcastTimeOffsetMinutes(&OffsetMinutes)) {
+		if (EPGTime->OffsetSeconds(OffsetMinutes * 60))
+			return true;
+	} else if (EPGTime->ToLocal()) {
 		return true;
+	}
 
 	EPGTime->Reset();
 
@@ -299,13 +343,17 @@ bool UTCTimeToEPGTime(const DateTime &UTCTime, ReturnArg<DateTime> EPGTime)
 }
 
 
-// EPGの日時(ローカル日時)からローカル日時に変換する
+// EPGの日時(TOTオフセットまたはローカル日時)からローカル日時に変換する
 bool EPGTimeToLocalTime(const DateTime &EPGTime, ReturnArg<DateTime> LocalTime)
 {
 	if (!LocalTime)
 		return false;
 
-	if (EPGTime.IsValid()) {
+	int OffsetMinutes = 0;
+	if (GetBroadcastTimeOffsetMinutes(&OffsetMinutes)) {
+		if (EPGTimeToUTCTime(EPGTime, LocalTime) && LocalTime->ToLocal())
+			return true;
+	} else if (EPGTime.IsValid()) {
 		LocalTime = EPGTime;
 		return true;
 	}
@@ -316,14 +364,19 @@ bool EPGTimeToLocalTime(const DateTime &EPGTime, ReturnArg<DateTime> LocalTime)
 }
 
 
-// 現在の日時をEPGの日時(ローカル日時)で取得する
+// 現在の日時をEPGの日時(TOTオフセットまたはローカル日時)で取得する
 bool GetCurrentEPGTime(ReturnArg<DateTime> Time)
 {
 	if (!Time)
 		return false;
 
-	if (Time->NowLocal())
+	int OffsetMinutes = 0;
+	if (GetBroadcastTimeOffsetMinutes(&OffsetMinutes)) {
+		if (Time->NowUTC() && Time->OffsetSeconds(OffsetMinutes * 60))
+			return true;
+	} else if (Time->NowLocal()) {
 		return true;
+	}
 
 	Time->Reset();
 

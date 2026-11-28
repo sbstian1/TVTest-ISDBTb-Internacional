@@ -359,6 +359,7 @@ namespace LibISDB
 			uint8_t RemoteControlKeyID = 0;
 			String NetworkName;
 			String TSName;
+			std::vector<uint16_t> PartialReceptionServiceList;
 
 			void Reset() { *this = NITInfo(); }
 		};

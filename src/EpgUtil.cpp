@@ -361,7 +361,7 @@ bool GetEventGenre(
 	int *pLevel1, int *pLevel2)
 {
 	for (int i = 0; i < ContentNibble.NibbleCount; i++) {
-		if (ContentNibble.NibbleList[i].ContentNibbleLevel1 != 0xE) {
+		if (ContentNibble.NibbleList[i].ContentNibbleLevel1 < CEpgGenre::NUM_GENRE) {
 			if (pLevel1 != nullptr)
 				*pLevel1 = ContentNibble.NibbleList[i].ContentNibbleLevel1;
 			if (pLevel2 != nullptr)
@@ -548,259 +548,185 @@ String MapARIBSymbol(const String &Source)
 
 LPCTSTR CEpgGenre::GetText(int Level1, int Level2) const
 {
+	// ISDB-Tb (ABNT NBR 15603-2 Table 27) content_nibble_level_1 / level_2
 	static const struct {
 		LPCTSTR pszText;
 		LPCTSTR pszSubText[16];
 	} GenreList[] = {
-		{
-			TEXT("Noticias / Actualidad"),
+		{ // 0x0
+			TEXT("Periodismo / Noticias"),
 			{
-				TEXT("General / Regular"),
-				TEXT("Clima y tiempo"),
-				TEXT("Especiales / Documental"),
-				TEXT("Política / Congreso"),
-				TEXT("Economía / Finanzas"),
-				TEXT("Internacional"),
-				TEXT("Análisis"),
-				TEXT("Debate / Entrevistas"),
-				TEXT("Edición especial"),
-				TEXT("Regional / Local"),
-				TEXT("Tráfico"),
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
+				TEXT("Noticiero"),
+				TEXT("Reportaje"),
+				TEXT("Documental"),
+				TEXT("Biografía"),
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
 				TEXT("Otros")
 			}
 		},
-		{
+		{ // 0x1
 			TEXT("Deportes"),
 			{
-				TEXT("Noticias deportivas"),
-				TEXT("Béisbol"),
-				TEXT("Fútbol"),
-				TEXT("Golf"),
-				TEXT("Otros deportes con pelota"),
-				TEXT("Lucha / Artes marciales"),
-				TEXT("Juegos Olímpicos / Torneos"),
-				TEXT("Maratón / Atletismo / Natación"),
-				TEXT("Automovilismo / Deportes de motor"),
-				TEXT("Deportes náuticos e invernales"),
-				TEXT("Hípica / Carreras"),
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				TEXT("Otros")
-			}
-		},
-		{
-			TEXT("Variedades / Magacín"),
-			{
-				TEXT("Espectáculos"),
-				TEXT("Moda y estilo"),
-				TEXT("Hogar y estilo de vida"),
-				TEXT("Salud y medicina"),
-				TEXT("Compras / Teletienda"),
-				TEXT("Gastronomía y cocina"),
-				TEXT("Eventos"),
-				TEXT("Avances y anuncios"),
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				TEXT("Otros")
-			}
-		},
-		{
-			TEXT("Series / Telenovelas / Drama"),
-			{
-				TEXT("Series nacionales"),
-				TEXT("Series internacionales"),
-				TEXT("Drama histórico"),
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				TEXT("Otros")
-			}
-		},
-		{
-			TEXT("Música"),
-			{
-				TEXT("Pop / Rock nacional"),
-				TEXT("Pop / Rock internacional"),
-				TEXT("Clásica / Ópera"),
-				TEXT("Jazz / Fusión"),
-				TEXT("Música tradicional / Popular"),
-				TEXT("Conciertos en vivo"),
-				TEXT("Listas de éxitos / Rankings"),
-				TEXT("Karaoke / Concursos de canto"),
-				TEXT("Folclore / Música folclórica"),
-				TEXT("Música infantil"),
-				TEXT("Música del mundo"),
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				TEXT("Otros")
-			}
-		},
-		{
-			TEXT("Entretenimiento / Show"),
-			{
-				TEXT("Concursos / Preguntas"),
-				TEXT("Juegos"),
-				TEXT("Talk shows"),
-				TEXT("Humor / Comedia"),
-				TEXT("Variedades musicales"),
-				TEXT("Viajes y aventura"),
-				TEXT("Programas de cocina"),
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				TEXT("Otros")
-			}
-		},
-		{
-			TEXT("Cine / Películas"),
-			{
-				TEXT("Cine internacional"),
-				TEXT("Cine nacional"),
-				TEXT("Animación"),
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				TEXT("Otros")
-			}
-		},
-		{
-			TEXT("Animación / Efectos"),
-			{
-				TEXT("Animación nacional"),
-				TEXT("Animación internacional"),
-				TEXT("Efectos especiales / Tokusatsu"),
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				TEXT("Otros")
-			}
-		},
-		{
-			TEXT("Documentales / Cultura"),
-			{
-				TEXT("Sociedad y actualidad"),
-				TEXT("Historia y viajes"),
-				TEXT("Naturaleza y medio ambiente"),
-				TEXT("Ciencia, espacio y tecnología"),
-				TEXT("Cultura y tradiciones"),
-				TEXT("Literatura y artes"),
 				TEXT("Deportes"),
-				TEXT("Documentales generales"),
-				TEXT("Entrevistas y debates"),
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
+				nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
 				TEXT("Otros")
 			}
 		},
-		{
-			TEXT("Teatro / Espectáculos"),
+		{ // 0x2
+			TEXT("Educativo"),
 			{
-				TEXT("Teatro contemporáneo"),
-				TEXT("Musicales"),
-				TEXT("Danza y ballet"),
-				TEXT("Comedia en vivo / Monólogos"),
-				TEXT("Teatro clásico"),
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
+				TEXT("Educativo"),
+				nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
 				TEXT("Otros")
 			}
 		},
-		{
-			TEXT("Aficiones / Educación"),
+		{ // 0x3
+			TEXT("Novela"),
 			{
-				TEXT("Viajes, pesca y aire libre"),
-				TEXT("Jardinería, mascotas y manualidades"),
-				TEXT("Arte, música y artesanía"),
-				TEXT("Ajedrez / Juegos de mesa"),
-				TEXT("Juegos de azar"),
-				TEXT("Motor y motociclismo"),
-				TEXT("Informática y videojuegos"),
-				TEXT("Idiomas"),
-				TEXT("Infantil y primaria"),
-				TEXT("Secundaria y bachillerato"),
-				TEXT("Universidad / Exámenes"),
-				TEXT("Capacitación y cursos"),
-				TEXT("Debate educativo"),
-				nullptr,
-				nullptr,
+				TEXT("Novela"),
+				nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
 				TEXT("Otros")
 			}
 		},
-		{
-			TEXT("Bienestar social"),
+		{ // 0x4
+			TEXT("Miniserie"),
 			{
-				TEXT("Tercera edad"),
-				TEXT("Discapacidad e inclusión"),
-				TEXT("Asistencia social"),
-				TEXT("Voluntariado"),
-				TEXT("Lengua de señas"),
-				TEXT("Subtitulado (CC)"),
-				TEXT("Audiodescripción"),
+				TEXT("Miniserie"),
+				nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
+				TEXT("Otros")
+			}
+		},
+		{ // 0x5
+			TEXT("Serie"),
+			{
+				TEXT("Serie"),
+				nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
+				TEXT("Otros")
+			}
+		},
+		{ // 0x6
+			TEXT("Variedades"),
+			{
+				TEXT("Auditorio"),
+				TEXT("Show"),
+				TEXT("Musical"),
+				TEXT("Making of"),
+				TEXT("Femenino"),
+				TEXT("Juegos / Concursos"),
+				nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
+				TEXT("Otros")
+			}
+		},
+		{ // 0x7
+			TEXT("Reality Show"),
+			{
+				TEXT("Reality Show"),
+				nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
+				TEXT("Otros")
+			}
+		},
+		{ // 0x8
+			TEXT("Información"),
+			{
+				TEXT("Cocina / Gastronomía"),
+				TEXT("Moda"),
+				TEXT("Rural / Campo"),
+				TEXT("Salud"),
+				TEXT("Turismo"),
+				nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
+				TEXT("Otros")
+			}
+		},
+		{ // 0x9
+			TEXT("Humorístico"),
+			{
+				TEXT("Humorístico"),
+				nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
+				TEXT("Otros")
+			}
+		},
+		{ // 0xA
+			TEXT("Infantil"),
+			{
+				TEXT("Infantil"),
+				nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
+				TEXT("Otros")
+			}
+		},
+		{ // 0xB
+			TEXT("Erótico"),
+			{
+				TEXT("Erótico"),
+				nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
+				TEXT("Otros")
+			}
+		},
+		{ // 0xC
+			TEXT("Película"),
+			{
+				TEXT("Película"),
+				nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
+				TEXT("Otros")
+			}
+		},
+		{ // 0xD
+			TEXT("Sorteo / Televendas"),
+			{
+				TEXT("Sorteo"),
+				TEXT("Televendas"),
+				TEXT("Premiación"),
 				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
-				nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
+				TEXT("Otros")
+			}
+		},
+		{ // 0xE
+			TEXT("Debate / Entrevista"),
+			{
+				TEXT("Debate"),
+				TEXT("Entrevista"),
+				nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr, nullptr,
+				nullptr, nullptr, nullptr,
 				TEXT("Otros")
 			}
 		},
@@ -1082,10 +1008,29 @@ Theme::ThemeColor CEpgTheme::GetColor(int Type) const
 
 Theme::ThemeColor CEpgTheme::GetGenreColor(int Genre) const
 {
-	return m_ColorList[
-		Genre >= 0 && Genre <= CEpgGenre::GENRE_LAST ?
-			COLOR_CONTENT_FIRST + Genre :
-			COLOR_CONTENT_OTHER];
+	// Map ISDB-Tb ABNT NBR 15603-2 genres (0x0..0xE) safely to the 12 theme genre color slots
+	static constexpr int ISDBTbColorMap[15] = {
+		CEpgGenre::GENRE_NEWS,        // 0x0 Periodismo / Noticias
+		CEpgGenre::GENRE_SPORTS,      // 0x1 Deportes
+		CEpgGenre::GENRE_EDUCATION,   // 0x2 Educativo
+		CEpgGenre::GENRE_DRAMA,       // 0x3 Novela
+		CEpgGenre::GENRE_DRAMA,       // 0x4 Miniserie
+		CEpgGenre::GENRE_DRAMA,       // 0x5 Serie
+		CEpgGenre::GENRE_VARIETY,     // 0x6 Variedades
+		CEpgGenre::GENRE_VARIETY,     // 0x7 Reality Show
+		CEpgGenre::GENRE_INFORMATION, // 0x8 Información
+		CEpgGenre::GENRE_VARIETY,     // 0x9 Humorístico
+		CEpgGenre::GENRE_ANIME,       // 0xA Infantil
+		-1,                           // 0xB Erótico -> Other
+		CEpgGenre::GENRE_MOVIE,       // 0xC Película
+		CEpgGenre::GENRE_INFORMATION, // 0xD Sorteo / Televendas
+		CEpgGenre::GENRE_DOCUMENTARY, // 0xE Debate / Entrevista
+	};
+
+	if (Genre >= 0 && Genre < static_cast<int>(lengthof(ISDBTbColorMap)) && ISDBTbColorMap[Genre] >= 0)
+		return m_ColorList[COLOR_CONTENT_FIRST + ISDBTbColorMap[Genre]];
+
+	return m_ColorList[COLOR_CONTENT_OTHER];
 }
 
 

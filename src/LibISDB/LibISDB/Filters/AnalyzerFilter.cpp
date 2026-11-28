@@ -206,7 +206,14 @@ bool AnalyzerFilter::Is1SegService(int Index) const
 	if (static_cast<unsigned int>(Index) >= m_ServiceList.size())
 		return false;
 
-	return Is1SegPMTPID(m_ServiceList[Index].PMTPID);
+	if (Is1SegPMTPID(m_ServiceList[Index].PMTPID))
+		return true;
+
+	const uint16_t ServiceID = m_ServiceList[Index].ServiceID;
+	return std::find(
+		m_NITInfo.PartialReceptionServiceList.begin(),
+		m_NITInfo.PartialReceptionServiceList.end(),
+		ServiceID) != m_NITInfo.PartialReceptionServiceList.end();
 }
 
 
@@ -1300,6 +1307,20 @@ bool AnalyzerFilter::GetEventInfo(int ServiceIndex, ReturnArg<EventInfo> Info, b
 	if (!GetEventContentNibble(ServiceIndex, &Info->ContentNibble, Next))
 		Info->ContentNibble.NibbleCount = 0;
 
+	Info->ParentalRating = 0;
+	Info->ParentalRatingCountryCode = 0;
+	const DescriptorBlock *pEventDescBlock = GetHEITItemDesc(ServiceIndex, Next);
+	if (pEventDescBlock != nullptr) {
+		const ParentalRatingDescriptor *pParentalDesc = pEventDescBlock->GetDescriptor<ParentalRatingDescriptor>();
+		if (pParentalDesc != nullptr && pParentalDesc->GetRatingCount() > 0) {
+			ParentalRatingDescriptor::RatingInfo Rating;
+			if (pParentalDesc->GetRatingInfo(0, &Rating)) {
+				Info->ParentalRating = Rating.Rating;
+				Info->ParentalRatingCountryCode = Rating.CountryCode;
+			}
+		}
+	}
+
 	Info->Type = EventInfo::TypeFlag::Basic | EventInfo::TypeFlag::Extended
 		| (Next ? EventInfo::TypeFlag::Following : EventInfo::TypeFlag::Present);
 
@@ -2291,6 +2312,7 @@ void AnalyzerFilter::OnNITSection(const PSITableBase *pTable, const PSISection *
 
 	// TS リスト取得
 	m_NetworkStreamList.clear();
+	m_NITInfo.PartialReceptionServiceList.clear();
 
 	for (uint16_t SectionNo = 0; SectionNo < pNITMultiTable->GetNITSectionCount(); SectionNo++) {
 		if (SectionNo > 0) {
@@ -2324,6 +2346,22 @@ void AnalyzerFilter::OnNITSection(const PSITableBase *pTable, const PSISection *
 								if (Service.ServiceType == SERVICE_TYPE_INVALID)
 									Service.ServiceType = Info.ServiceType;
 							}
+						}
+					}
+				}
+
+				// 部分受信記述子 (1-Seg / ISDB-Tb)
+				const PartialReceptionDescriptor *pPartialDesc =
+					pDescBlock->GetDescriptor<PartialReceptionDescriptor>();
+				if (pPartialDesc != nullptr) {
+					for (int j = 0; j < pPartialDesc->GetServiceCount(); j++) {
+						const uint16_t PartialServiceID = pPartialDesc->GetServiceID(j);
+						if (PartialServiceID != SERVICE_ID_INVALID
+								&& std::find(
+									m_NITInfo.PartialReceptionServiceList.begin(),
+									m_NITInfo.PartialReceptionServiceList.end(),
+									PartialServiceID) == m_NITInfo.PartialReceptionServiceList.end()) {
+							m_NITInfo.PartialReceptionServiceList.push_back(PartialServiceID);
 						}
 					}
 				}
@@ -2407,6 +2445,23 @@ void AnalyzerFilter::OnCATSection(const PSITableBase *pTable, const PSISection *
 void AnalyzerFilter::OnTOTSection(const PSITableBase *pTable, const PSISection *pSection)
 {
 	// TOTが更新された
+	const TOTTable *pTOTTable = dynamic_cast<const TOTTable *>(pTable);
+	if (pTOTTable != nullptr) {
+		const DescriptorBlock *pDescBlock = pTOTTable->GetTOTDescriptorBlock();
+		if (pDescBlock != nullptr) {
+			const LocalTimeOffsetDescriptor *pOffsetDesc =
+				pDescBlock->GetDescriptor<LocalTimeOffsetDescriptor>();
+			if (pOffsetDesc != nullptr && pOffsetDesc->GetTimeOffsetInfoCount() > 0) {
+				LocalTimeOffsetDescriptor::TimeOffsetInfo Info;
+				if (pOffsetDesc->GetTimeOffsetInfo(0, &Info)) {
+					const int SignedOffset = Info.LocalTimeOffsetPolarity
+						? -static_cast<int>(Info.LocalTimeOffset)
+						: static_cast<int>(Info.LocalTimeOffset);
+					SetBroadcastTimeOffsetMinutes(SignedOffset);
+				}
+			}
+		}
+	}
 
 	// 現在のPCRを記憶
 	uint16_t PCRPID = PID_INVALID;

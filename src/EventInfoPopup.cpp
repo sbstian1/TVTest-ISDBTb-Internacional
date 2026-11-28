@@ -193,10 +193,54 @@ void CEventInfoPopup::UpdateEventInfo()
 		CEpgGenre EpgGenre;
 		LPCTSTR pszGenre = EpgGenre.GetText(Genre1, -1);
 		if (pszGenre != nullptr) {
-			Formatter.AppendFormat(TEXT("\r\n■ Género: {}"), pszGenre);
+			Formatter.AppendFormat(
+				TEXT("\r\n■ {}: {}"),
+				GetAppClass().LanguageManager.Translate(TEXT("Género")),
+				pszGenre);
 			pszGenre = EpgGenre.GetText(Genre1, Genre2);
 			if (pszGenre != nullptr)
 				Formatter.AppendFormat(TEXT(" - {}"), pszGenre);
+		}
+	}
+
+	if (m_EventInfo.ParentalRating != 0) {
+		const uint8_t AgeCode = m_EventInfo.ParentalRating & 0x0F;
+		const uint8_t ContentFlags = m_EventInfo.ParentalRating >> 4;
+		LPCTSTR pszAge = nullptr;
+		TCHAR szAgeBuf[16];
+		switch (AgeCode) {
+		case 0x01: pszAge = GetAppClass().LanguageManager.Translate(TEXT("Libre (ATP)")); break;
+		case 0x02: pszAge = TEXT("+10"); break;
+		case 0x03: pszAge = TEXT("+12"); break;
+		case 0x04: pszAge = TEXT("+14"); break;
+		case 0x05: pszAge = TEXT("+16"); break;
+		case 0x06: pszAge = TEXT("+18"); break;
+		default:
+			if (AgeCode >= 0x07 && AgeCode <= 0x0F) {
+				StringFormat(szAgeBuf, TEXT("+{}"), static_cast<int>(AgeCode) + 3);
+				pszAge = szAgeBuf;
+			}
+			break;
+		}
+		if (pszAge != nullptr) {
+			Formatter.AppendFormat(
+				TEXT("\r\n■ {}: {}"),
+				GetAppClass().LanguageManager.Translate(TEXT("Clasificación")),
+				pszAge);
+			String ContentDesc;
+			if (ContentFlags & 0x01) {
+				ContentDesc += GetAppClass().LanguageManager.Translate(TEXT("Drogas"));
+			}
+			if (ContentFlags & 0x02) {
+				if (!ContentDesc.empty()) ContentDesc += TEXT(", ");
+				ContentDesc += GetAppClass().LanguageManager.Translate(TEXT("Violencia"));
+			}
+			if (ContentFlags & 0x04) {
+				if (!ContentDesc.empty()) ContentDesc += TEXT(", ");
+				ContentDesc += GetAppClass().LanguageManager.Translate(TEXT("Sexo"));
+			}
+			if (!ContentDesc.empty())
+				Formatter.AppendFormat(TEXT(" ({})"), ContentDesc);
 		}
 	}
 

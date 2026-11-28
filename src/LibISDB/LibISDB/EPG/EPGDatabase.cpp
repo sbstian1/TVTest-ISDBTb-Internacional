@@ -761,6 +761,16 @@ bool EPGDatabase::UpdateSection(
 					pContentDesc->GetNibble(j, &pEvent->ContentNibble.NibbleList[j]);
 			}
 
+			// ペアレンタルレーティング記述子 (ISDB-Tb 0x55)
+			const ParentalRatingDescriptor *pParentalDesc = pDescBlock->GetDescriptor<ParentalRatingDescriptor>();
+			if (pParentalDesc != nullptr && pParentalDesc->GetRatingCount() > 0) {
+				ParentalRatingDescriptor::RatingInfo Rating;
+				if (pParentalDesc->GetRatingInfo(0, &Rating)) {
+					pEvent->ParentalRating = Rating.Rating;
+					pEvent->ParentalRatingCountryCode = Rating.CountryCode;
+				}
+			}
+
 			// イベントグループ記述子
 			if (pDescBlock->GetDescriptorByTag(EventGroupDescriptor::TAG) != nullptr) {
 				pEvent->EventGroupList.clear();

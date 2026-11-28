@@ -345,6 +345,29 @@ namespace LibISDB
 		NibbleInfo m_NibbleList[7];
 	};
 
+	/** ペアレンタルレーティング記述子クラス (ISDB-Tb ABNT NBR 15603-2 / DVB 0x55) */
+	class ParentalRatingDescriptor
+		: public DescriptorTemplate<ParentalRatingDescriptor, 0x55>
+	{
+	public:
+		struct RatingInfo {
+			uint32_t CountryCode; /**< country_code (24-bit ISO 3166-1 alpha-3) */
+			uint8_t Rating;       /**< rating */
+		};
+
+	// DescriptorBase
+		void Reset() noexcept override;
+
+	// ParentalRatingDescriptor
+		int GetRatingCount() const;
+		bool GetRatingInfo(int Index, ReturnArg<RatingInfo> Info) const;
+
+	protected:
+		bool StoreContents(const uint8_t *pPayload) override;
+
+		std::vector<RatingInfo> m_RatingList;
+	};
+
 	/** ローカル時間オフセット記述子クラス */
 	class LocalTimeOffsetDescriptor
 		: public DescriptorTemplate<LocalTimeOffsetDescriptor, 0x58>

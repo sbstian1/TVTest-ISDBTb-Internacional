@@ -647,6 +647,53 @@ bool ContentDescriptor::StoreContents(const uint8_t *pPayload)
 
 
 
+void ParentalRatingDescriptor::Reset() noexcept
+{
+	m_RatingList.clear();
+}
+
+
+int ParentalRatingDescriptor::GetRatingCount() const
+{
+	return static_cast<int>(m_RatingList.size());
+}
+
+
+bool ParentalRatingDescriptor::GetRatingInfo(int Index, ReturnArg<RatingInfo> Info) const
+{
+	if ((static_cast<unsigned int>(Index) >= m_RatingList.size()) || !Info)
+		return false;
+
+	Info = m_RatingList[Index];
+
+	return true;
+}
+
+
+bool ParentalRatingDescriptor::StoreContents(const uint8_t *pPayload)
+{
+	if (m_Length < 4 || (m_Length % 4) != 0)
+		return false;
+
+	m_RatingList.clear();
+	const int Count = m_Length / 4;
+	m_RatingList.reserve(Count);
+
+	for (int i = 0; i < Count; i++) {
+		const int Pos = i * 4;
+		RatingInfo Info;
+		Info.CountryCode =
+			(static_cast<uint32_t>(pPayload[Pos + 0]) << 16) |
+			(static_cast<uint32_t>(pPayload[Pos + 1]) << 8) |
+			static_cast<uint32_t>(pPayload[Pos + 2]);
+		Info.Rating = pPayload[Pos + 3];
+		m_RatingList.push_back(Info);
+	}
+
+	return true;
+}
+
+
 void LocalTimeOffsetDescriptor::Reset() noexcept
 {
 	DescriptorBase::Reset();

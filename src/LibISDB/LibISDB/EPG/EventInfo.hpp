@@ -144,6 +144,8 @@ namespace LibISDB
 		VideoInfoList VideoList;
 		AudioInfoList AudioList;
 		ContentNibbleInfo ContentNibble;
+		uint8_t ParentalRating = 0;
+		uint32_t ParentalRatingCountryCode = 0;
 		EventGroupInfoList EventGroupList;
 		bool IsCommonEvent = false;
 		CommonEventInfo CommonEvent;
@@ -180,6 +182,9 @@ namespace LibISDB
 	bool UTCTimeToEPGTime(const DateTime &UTCTime, ReturnArg<DateTime> EPGTime);
 	bool EPGTimeToLocalTime(const DateTime &EPGTime, ReturnArg<DateTime> LocalTime);
 	bool GetCurrentEPGTime(ReturnArg<DateTime> Time);
+	void SetBroadcastTimeOffsetMinutes(int OffsetMinutes) noexcept;
+	void ClearBroadcastTimeOffset() noexcept;
+	bool GetBroadcastTimeOffsetMinutes(ReturnArg<int> OffsetMinutes) noexcept;
 
 	struct EventExtendedTextItem {
 		ARIBString Description;

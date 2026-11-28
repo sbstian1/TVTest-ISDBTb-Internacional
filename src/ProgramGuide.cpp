@@ -160,12 +160,13 @@ int CEventItem::GetGenre(int Level) const
 			return -1;
 		}
 		for (int i = 0; i < pContentNibble->NibbleCount; i++) {
-			if (pContentNibble->NibbleList[i].ContentNibbleLevel1 != 0xE) {
+			const int Level1 = pContentNibble->NibbleList[i].ContentNibbleLevel1;
+			if (Level1 < CEpgGenre::NUM_GENRE) {
 				const int Nibble =
 					Level == 0 ?
-						pContentNibble->NibbleList[i].ContentNibbleLevel1 :
+						Level1 :
 						pContentNibble->NibbleList[i].ContentNibbleLevel2;
-				if (Nibble <= CEpgGenre::GENRE_LAST)
+				if (Nibble < CEpgGenre::NUM_GENRE)
 					return Nibble;
 				break;
 			}

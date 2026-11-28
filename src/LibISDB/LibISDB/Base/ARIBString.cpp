@@ -110,7 +110,26 @@ bool ARIBStringDecoder::DecodeInternal(
 
 	const bool IsCaption = !!(Flags & DecodeFlag::Caption);
 	const bool Is1Seg    = !!(Flags & DecodeFlag::OneSeg);
-	const bool IsLatin   = true; // Default to ISDB-Tb (ABNT NBR 15603-2 / SBTVD Latin encoding)
+	bool IsLatin         = true; // Default to ISDB-Tb (ABNT NBR 15603-2 / SBTVD Latin encoding)
+
+	// Auto-detect Japanese ARIB/JIS escape sequences so Japanese ISDB-T streams still decode as JIS
+	for (size_t i = 0; i + 2 < SrcLength; ++i) {
+		if (pSrcData[i] == 0x1B) {
+			const uint8_t b1 = pSrcData[i + 1];
+			const uint8_t b2 = pSrcData[i + 2];
+			if (b1 == 0x24) {
+				// 2-byte JIS Kanji / ARIB designation (ESC $ ...)
+				IsLatin = false;
+				break;
+			}
+			if ((b1 == 0x28 || b1 == 0x29 || b1 == 0x2A || b1 == 0x2B) &&
+					(b2 == 0x30 || b2 == 0x31 || b2 == 0x32 || b2 == 0x39 || b2 == 0x3A || b2 == 0x3B || b2 == 0x42 || b2 == 0x77)) {
+				// Hiragana/Katakana/Kanji/JIS designation
+				IsLatin = false;
+				break;
+			}
+		}
+	}
 
 	// 状態初期設定
 	m_ESCSeqCount = 0;
@@ -154,7 +173,47 @@ bool ARIBStringDecoder::DecodeInternal(
 	m_pFormatList = FormatList ? &*FormatList : nullptr;
 	m_pDRCSMap = pDRCSMap;
 
-	m_IsUCS         = !!(Flags & DecodeFlag::UCS); if (!m_IsUCS && IsLatin) { bool hasMB = false, ok = true; for (size_t i = 0; i < SrcLength; ) { const uint8_t c = pSrcData[i]; if (c < 0x80) { if (c == 0x1B) { ok = false; break; } i++; } else if (c >= 0xC2 && c <= 0xDF) { if (i + 1 >= SrcLength || (pSrcData[i + 1] & 0xC0) != 0x80) { ok = false; break; } hasMB = true; i += 2; } else if (c >= 0xE0 && c <= 0xEF) { if (i + 2 >= SrcLength || (pSrcData[i + 1] & 0xC0) != 0x80 || (pSrcData[i + 2] & 0xC0) != 0x80) { ok = false; break; } hasMB = true; i += 3; } else if (c >= 0xF0 && c <= 0xF4) { if (i + 3 >= SrcLength || (pSrcData[i + 1] & 0xC0) != 0x80 || (pSrcData[i + 2] & 0xC0) != 0x80 || (pSrcData[i + 3] & 0xC0) != 0x80) { ok = false; break; } hasMB = true; i += 4; } else { ok = false; break; } } if (ok && hasMB) m_IsUCS = true; }
+	m_IsUCS = !!(Flags & DecodeFlag::UCS);
+	if (!m_IsUCS && IsLatin) {
+		bool hasMB = false;
+		bool ok = true;
+		for (size_t i = 0; i < SrcLength; ) {
+			const uint8_t c = pSrcData[i];
+			if (c < 0x80) {
+				if (c == 0x1B) {
+					ok = false;
+					break;
+				}
+				i++;
+			} else if (c >= 0xC2 && c <= 0xDF) {
+				if (i + 1 >= SrcLength || (pSrcData[i + 1] & 0xC0) != 0x80) {
+					ok = false;
+					break;
+				}
+				hasMB = true;
+				i += 2;
+			} else if (c >= 0xE0 && c <= 0xEF) {
+				if (i + 2 >= SrcLength || (pSrcData[i + 1] & 0xC0) != 0x80 || (pSrcData[i + 2] & 0xC0) != 0x80) {
+					ok = false;
+					break;
+				}
+				hasMB = true;
+				i += 3;
+			} else if (c >= 0xF0 && c <= 0xF4) {
+				if (i + 3 >= SrcLength || (pSrcData[i + 1] & 0xC0) != 0x80 || (pSrcData[i + 2] & 0xC0) != 0x80 || (pSrcData[i + 3] & 0xC0) != 0x80) {
+					ok = false;
+					break;
+				}
+				hasMB = true;
+				i += 4;
+			} else {
+				ok = false;
+				break;
+			}
+		}
+		if (ok && hasMB)
+			m_IsUCS = true;
+	}
 	m_UseCharSize   = !!(Flags & DecodeFlag::UseCharSize);
 	m_UnicodeSymbol = !!(Flags & DecodeFlag::UnicodeSymbol);
 

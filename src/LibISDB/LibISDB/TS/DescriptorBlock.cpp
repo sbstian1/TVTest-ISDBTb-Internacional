@@ -165,6 +165,7 @@ DescriptorBase * DescriptorBlock::CreateDescriptorInstance(uint8_t Tag)
 	case ComponentDescriptor::TAG                 : return new ComponentDescriptor;
 	case StreamIDDescriptor::TAG                  : return new StreamIDDescriptor;
 	case ContentDescriptor::TAG                   : return new ContentDescriptor;
+	case ParentalRatingDescriptor::TAG            : return new ParentalRatingDescriptor;
 	case LocalTimeOffsetDescriptor::TAG           : return new LocalTimeOffsetDescriptor;
 	case HierarchicalTransmissionDescriptor::TAG  : return new HierarchicalTransmissionDescriptor;
 	case DigitalCopyControlDescriptor::TAG        : return new DigitalCopyControlDescriptor;
