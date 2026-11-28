@@ -72,8 +72,13 @@ namespace TVTest
 			str = str.substr(1, str.length() - 2);
 		}
 
-		// Process escape sequences \n and \t
+		// Process escape sequences \r, \n and \t
 		size_t pos = 0;
+		while ((pos = str.find(L"\\r", pos)) != std::wstring::npos) {
+			str.replace(pos, 2, L"\r");
+			pos += 1;
+		}
+		pos = 0;
 		while ((pos = str.find(L"\\n", pos)) != std::wstring::npos) {
 			str.replace(pos, 2, L"\n");
 			pos += 1;
@@ -158,7 +163,21 @@ namespace TVTest
 				continue;
 			}
 
-			size_t eqPos = line.find(L'=');
+			size_t eqPos = std::wstring::npos;
+			if (line.front() == L'"') {
+				// Find closing quote followed by '=' so keys containing '=' parse accurately
+				for (size_t p = 1; p < line.length(); ++p) {
+					if (line[p] == L'"' && line[p - 1] != L'\\') {
+						size_t after = line.find_first_not_of(L" \t", p + 1);
+						if (after != std::wstring::npos && line[after] == L'=') {
+							eqPos = after;
+							break;
+						}
+					}
+				}
+			}
+			if (eqPos == std::wstring::npos)
+				eqPos = line.find(L'=');
 			if (eqPos == std::wstring::npos)
 				continue;
 
