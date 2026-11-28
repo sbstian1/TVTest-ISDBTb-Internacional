@@ -959,28 +959,6 @@ HRESULT AudioDecoderFilter::ProcessPCM(
 				}
 			}
 			OutSize = OutSamples * OutChannels * sizeof(int16_t);
-		} else if ( false ) {
-			thread_local std::vector<int16_t> TempPCM;
-			TempPCM.assign(
-				reinterpret_cast<const int16_t *>(pOutBuff),
-				reinterpret_cast<const int16_t *>(pOutBuff) + Samples * OutChannels);
-			int16_t *pDst = reinterpret_cast<int16_t *>(pOutBuff);
-
-			for (size_t i = 0; i < OutSamples; i++) {
-				const uint64_t PosFP = (static_cast<uint64_t>(i) * Info.Frequency << 16) / OutFrequency;
-				size_t Idx0 = static_cast<size_t>(PosFP >> 16);
-				if (Idx0 >= Samples)
-					Idx0 = Samples - 1;
-				const size_t Idx1 = (Idx0 + 1 < Samples) ? (Idx0 + 1) : Idx0;
-				const int32_t Frac = static_cast<int32_t>(PosFP & 0xFFFF);
-
-				for (int ch = 0; ch < OutChannels; ch++) {
-					const int32_t s0 = TempPCM[Idx0 * OutChannels + ch];
-					const int32_t s1 = TempPCM[Idx1 * OutChannels + ch];
-					pDst[i * OutChannels + ch] = static_cast<int16_t>(s0 + (((s1 - s0) * Frac) >> 16));
-				}
-			}
-			OutSize = OutSamples * OutChannels * sizeof(int16_t);
 		}
 
 		if (m_GainControl && (Info.ChannelCount < 6 || Surround)) {

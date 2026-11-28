@@ -1748,9 +1748,10 @@ void CChannelScan::Scan()
 									val = val * 10 + (BonChName[c] - L'0');
 									c++;
 								}
-								if (val > 0)
+								if (val > 0 && val <= 99) {
 									MajorChannel = val;
-								break;
+									break;
+								}
 							}
 						}
 					}
@@ -1761,7 +1762,7 @@ void CChannelScan::Scan()
 
 					int MinorChannel = 0;
 
-					// Formatear numeración ISDB-Tb (ej: "7.1", "7.2", "7.31") al principio del nombre si no lo incluye
+					// Asignar numeración virtual ISDB-Tb (ej: "7.1", "7.2", "7.31") usando ServiceID (ABNT NBR 15603-2)
 					if (MajorChannel > 0) {
 						bool bIs1Seg = (ServiceInfo.ServiceType == LibISDB::SERVICE_TYPE_DATA)
 							|| (ServiceIndex >= 0 && pAnalyzer->Is1SegService(ServiceIndex))
@@ -1771,10 +1772,10 @@ void CChannelScan::Scan()
 
 						if (bIs1Seg) {
 							OneSegCount++;
-							MinorChannel = (OneSegCount == 1) ? 31 : (30 + OneSegCount);
+							MinorChannel = (ServiceID != 0) ? (31 + (ServiceID & 0x07)) : (30 + OneSegCount);
 						} else {
 							FullSegCount++;
-							MinorChannel = FullSegCount;
+							MinorChannel = (ServiceID != 0) ? ((ServiceID & 0x07) + 1) : FullSegCount;
 						}
 						if (RemoteControlKeyID == 0) {
 							RemoteControlKeyID = MajorChannel;

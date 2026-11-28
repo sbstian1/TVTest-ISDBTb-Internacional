@@ -145,12 +145,13 @@ namespace TVTest
 			start = (end < text.length() && text[end] == L'\r' && end + 1 < text.length() && text[end + 1] == L'\n')
 				? end + 2 : end + 1;
 
-			// Trim leading whitespace
+			// Trim leading and trailing whitespace
 			size_t first = line.find_first_not_of(L" \t");
 			if (first == std::wstring::npos || line[first] == L';' || line[first] == L'#')
 				continue;
 
-			line = line.substr(first);
+			size_t last = line.find_last_not_of(L" \t");
+			line = line.substr(first, last - first + 1);
 
 			if (line.front() == L'[' && line.back() == L']') {
 				curSection = line.substr(1, line.length() - 2);
@@ -183,7 +184,7 @@ namespace TVTest
 			if (info.Code.empty()) {
 				// Use file name without extension as code
 				TCHAR szFile[MAX_PATH];
-				::lstrcpy(szFile, pszFilePath);
+				StringCopy(szFile, pszFilePath);
 				::PathRemoveExtension(szFile);
 				info.Code = ::PathFindFileName(szFile);
 			}
@@ -367,22 +368,37 @@ namespace TVTest
 			}
 		}
 
-		// Translate all child controls (buttons, checkboxes, labels, group boxes, tabs, listviews)
+		// Translate all child controls (buttons, checkboxes, labels, group boxes, tabs, listviews, comboboxes)
 		::EnumChildWindows(
 			hDlg,
 			[](HWND hwndChild, LPARAM lParam) -> BOOL {
 				const auto *pMap = reinterpret_cast<const std::unordered_map<std::wstring, std::wstring>*>(lParam);
-				wchar_t szText[512];
-				const int len = ::GetWindowText(hwndChild, szText, 512);
-				if (len > 0) {
-					auto it = pMap->find(szText);
-					if (it != pMap->end() && !it->second.empty()) {
-						::SetWindowText(hwndChild, it->second.c_str());
+
+				wchar_t szClassName[64] = {};
+				const bool fHasClass = ::GetClassName(hwndChild, szClassName, 64) > 0;
+
+				// Avoid overwriting user input / item controls with SetWindowText
+				const bool fSkipWindowText = fHasClass && (
+					_wcsicmp(szClassName, L"Edit") == 0 ||
+					_wcsicmp(szClassName, L"ComboBox") == 0 ||
+					_wcsicmp(szClassName, L"ListBox") == 0 ||
+					_wcsicmp(szClassName, WC_TABCONTROL) == 0 ||
+					_wcsicmp(szClassName, WC_LISTVIEW) == 0 ||
+					_wcsicmp(szClassName, WC_TREEVIEW) == 0 ||
+					_wcsnicmp(szClassName, L"RichEdit", 8) == 0);
+
+				if (!fSkipWindowText) {
+					wchar_t szText[512];
+					const int len = ::GetWindowText(hwndChild, szText, 512);
+					if (len > 0) {
+						auto it = pMap->find(szText);
+						if (it != pMap->end() && !it->second.empty()) {
+							::SetWindowText(hwndChild, it->second.c_str());
+						}
 					}
 				}
 
-				wchar_t szClassName[64] = {};
-				if (::GetClassName(hwndChild, szClassName, 64) > 0) {
+				if (fHasClass) {
 					if (_wcsicmp(szClassName, WC_TABCONTROL) == 0) {
 						const int tabCount = TabCtrl_GetItemCount(hwndChild);
 						for (int t = 0; t < tabCount; t++) {
@@ -434,31 +450,40 @@ namespace TVTest
 								}
 							}
 						}
-					} else if (_wcsicmp(szClassName, L"ComboBox") == 0 && ::GetDlgCtrlID(hwndChild) != IDC_OPTIONS_LANGUAGE) {
-						const int itemCount = static_cast<int>(::SendMessage(hwndChild, CB_GETCOUNT, 0, 0));
-						if (itemCount > 0 && itemCount != CB_ERR) {
-							const int curSel = static_cast<int>(::SendMessage(hwndChild, CB_GETCURSEL, 0, 0));
-							bool fChangedAny = false;
-							for (int idx = 0; idx < itemCount; idx++) {
-								const LRESULT textLen = ::SendMessage(hwndChild, CB_GETLBTEXTLEN, idx, 0);
-								if (textLen > 0 && textLen < 512) {
-									wchar_t szItemText[512] = {};
-									if (::SendMessage(hwndChild, CB_GETLBTEXT, idx, reinterpret_cast<LPARAM>(szItemText)) != CB_ERR) {
-										auto itItem = pMap->find(szItemText);
-										if (itItem != pMap->end() && !itItem->second.empty() && itItem->second != szItemText) {
-											const LRESULT itemData = ::SendMessage(hwndChild, CB_GETITEMDATA, idx, 0);
-											::SendMessage(hwndChild, CB_DELETESTRING, idx, 0);
-											::SendMessage(hwndChild, CB_INSERTSTRING, idx, reinterpret_cast<LPARAM>(itItem->second.c_str()));
-											if (itemData != CB_ERR) {
-												::SendMessage(hwndChild, CB_SETITEMDATA, idx, itemData);
+					} else if (_wcsicmp(szClassName, L"ComboBox") == 0) {
+						const int ctrlID = ::GetDlgCtrlID(hwndChild);
+						const LONG_PTR style = ::GetWindowLongPtr(hwndChild, GWL_STYLE);
+						const bool fOwnerDrawNoStrings =
+							((style & (CBS_OWNERDRAWFIXED | CBS_OWNERDRAWVARIABLE)) != 0) &&
+							((style & CBS_HASSTRINGS) == 0);
+						if (ctrlID != IDC_OPTIONS_LANGUAGE
+								&& ctrlID != IDC_INITIALSETTINGS_LANGUAGE
+								&& !fOwnerDrawNoStrings) {
+							const int itemCount = static_cast<int>(::SendMessage(hwndChild, CB_GETCOUNT, 0, 0));
+							if (itemCount > 0 && itemCount != CB_ERR) {
+								const int curSel = static_cast<int>(::SendMessage(hwndChild, CB_GETCURSEL, 0, 0));
+								bool fChangedAny = false;
+								for (int idx = 0; idx < itemCount; idx++) {
+									const LRESULT textLen = ::SendMessage(hwndChild, CB_GETLBTEXTLEN, idx, 0);
+									if (textLen > 0 && textLen < 512) {
+										wchar_t szItemText[512] = {};
+										if (::SendMessage(hwndChild, CB_GETLBTEXT, idx, reinterpret_cast<LPARAM>(szItemText)) != CB_ERR) {
+											auto itItem = pMap->find(szItemText);
+											if (itItem != pMap->end() && !itItem->second.empty() && itItem->second != szItemText) {
+												const LRESULT itemData = ::SendMessage(hwndChild, CB_GETITEMDATA, idx, 0);
+												::SendMessage(hwndChild, CB_DELETESTRING, idx, 0);
+												::SendMessage(hwndChild, CB_INSERTSTRING, idx, reinterpret_cast<LPARAM>(itItem->second.c_str()));
+												if (itemData != CB_ERR) {
+													::SendMessage(hwndChild, CB_SETITEMDATA, idx, itemData);
+												}
+												fChangedAny = true;
 											}
-											fChangedAny = true;
 										}
 									}
 								}
-							}
-							if (fChangedAny && curSel != CB_ERR) {
-								::SendMessage(hwndChild, CB_SETCURSEL, curSel, 0);
+								if (fChangedAny && curSel != CB_ERR) {
+									::SendMessage(hwndChild, CB_SETCURSEL, curSel, 0);
+								}
 							}
 						}
 					}

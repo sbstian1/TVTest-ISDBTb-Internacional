@@ -240,11 +240,17 @@ bool AACDecoder_FAAD2::DecodeFrame(const ADTSFrame *pFrame, ReturnArg<DecodeFram
 		else
 			m_AudioInfo.OriginalChannelCount = FrameInfo.channels;
 		m_AudioInfo.DualMono = (FrameInfo.channels == 2) && (m_LastChannelConfig == 0);
-		if (FrameInfo.samples > 0 && FrameInfo.channels > 0) { Info->pData = pPCMBuffer; Info->SampleCount = FrameInfo.samples / FrameInfo.channels; Info->Info = m_AudioInfo; Info->Discontinuity = m_DecodeError; OK = true; } else { Info->pData = nullptr; Info->SampleCount = 0; Info->Info = m_AudioInfo; Info->Discontinuity = false; OK = true; } if (false) {
+		if (FrameInfo.samples > 0 && FrameInfo.channels > 0) {
 			Info->pData = pPCMBuffer;
 			Info->SampleCount = FrameInfo.samples / FrameInfo.channels;
 			Info->Info = m_AudioInfo;
 			Info->Discontinuity = m_DecodeError;
+			OK = true;
+		} else {
+			Info->pData = nullptr;
+			Info->SampleCount = 0;
+			Info->Info = m_AudioInfo;
+			Info->Discontinuity = false;
 			OK = true;
 		}
 	} else {
